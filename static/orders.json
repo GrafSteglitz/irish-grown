@@ -1,0 +1,134 @@
+[
+  {
+    "id": "ORD-2024-001",
+    "customer": "Alice Murphy",
+    "date": "2024-03-10",
+    "total": "\u20ac15.50",
+    "status": "Pending"
+  },
+  {
+    "id": "ORD-2024-002",
+    "customer": "Bob Kelly",
+    "date": "2024-03-09",
+    "total": "\u20ac8.50",
+    "status": "Shipped"
+  },
+  {
+    "id": "ORD-2024-003",
+    "customer": "Charlie O'Brien",
+    "date": "2024-03-08",
+    "total": "\u20ac22.00",
+    "status": "Delivered"
+  },
+  {
+    "id": 1,
+    "customer": "oskar",
+    "delivery": {
+      "first_name": "Test",
+      "last_name": "User",
+      "email": "test@example.com",
+      "phone": "0871234567",
+      "address": "1 Test St",
+      "town": "Dublin",
+      "eircode": "D01AB12"
+    },
+    "delivery_method": "producer_delivery",
+    "items": [
+      {
+        "delivery_methods": [
+          "producer_delivery"
+        ],
+        "image": "eggs.png",
+        "name": "Farm Fresh Eggs",
+        "pickup_locations": [],
+        "price": 4.5,
+        "producer_name": "Test Farm",
+        "producer_username": "ocallagh_farm",
+        "product_id": 1,
+        "qty": 2
+      }
+    ],
+    "subtotal": 9.0,
+    "discount": 0.0,
+    "delivery_fee": 3.99,
+    "total": 12.99,
+    "coupon": null,
+    "status": "pending",
+    "date": "2026-03-16 18:36"
+  },
+  {
+    "id": 2,
+    "customer": "admin",
+    "delivery": {
+      "first_name": "Admin",
+      "last_name": "User",
+      "email": "admin@irishgrown.ie",
+      "phone": "0861234567",
+      "address": "1 Test St",
+      "town": "Dublin",
+      "eircode": "D01AB12"
+    },
+    "delivery_method": "producer_delivery",
+    "items": [
+      {
+        "delivery_methods": [
+          "producer_delivery"
+        ],
+        "image": "eggs.png",
+        "name": "Farm Fresh Eggs",
+        "pickup_locations": [],
+        "price": 4.5,
+        "producer_name": "O Callaghan",
+        "producer_username": "ocallagh_farm",
+        "product_id": 1,
+        "qty": 1
+      }
+    ],
+    "subtotal": 4.5,
+    "discount": 0.0,
+    "delivery_fee": 3.99,
+    "total": 8.49,
+    "coupon": null,
+    "status": "pending",
+    "date": "2026-03-16 18:41"
+  },
+  {
+    "id": 3,
+    "customer": "admin",
+    "delivery": {
+      "first_name": "Admin",
+      "last_name": "User",
+      "email": "admin@irishgrown.ie",
+      "phone": "384798374987",
+      "address": "",
+      "town": "",
+      "eircode": ""
+    },
+    "delivery_method": "collect_in_person",
+    "items": [
+      {
+        "delivery_methods": [
+          "collect_in_person",
+          "market_pickup",
+          "dropoff_box",
+          "producer_delivery"
+        ],
+        "image": "eggs.png",
+        "name": "Farm Fresh Eggs",
+        "pickup_locations": [],
+        "price": 4.5,
+        "producer_name": "O'Callaghan Farm",
+        "producer_username": "ocallagh_farm",
+        "product_id": 1,
+        "qty": 1
+      }
+    ],
+    "subtotal": 4.5,
+    "discount": 0.0,
+    "delivery_fee": 0.0,
+    "total": 4.5,
+    "coupon": null,
+    "status": "pending",
+    "date": "2026-03-18 21:15"
+  }
+]

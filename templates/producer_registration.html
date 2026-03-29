@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}
+Producer Registration
+{% endblock %}
+{% block scripts %}
+	<script src="{{url_for('static', filename='forms.js')}}" type="module"></script>
+	<script type="module">
+		import {init} from "{{url_for('static',filename='forms.js')}}";
+		window.addEventListener("load", (event) => {
+	        init();
+	    });
+	</script>
+{% endblock %}
+{% block body_content %}
+<div class="bevel-box">
+	<h1>Producer Registration</h1>
+</div>
+<div class="bevel-box">
+	<h2>Please complete the onboarding steps below to fully register your business with us.</h2>
+</div>
+<div class="templates">
+	<template id="t0">
+		<form id="form-t0" action="" autocomplete="off">
+			<h2>Please create a username and password...</h2>
+			<div class="form-grid">
+				<label for="username">Username: </label>
+				<input class="disappearing"  name="username" id="username" type="text" value="username" required/>
+				<label for="password">Password </label>
+				<input class="disappearing"  name="password" id="password" type="password" value="" required/>
+				<div class="form-error"></div>
+				<input class="disappearing"  class="form_submit" type="submit" value="Submit">
+			</div>
+		</form>
+	</template>
+	<template id="t1">
+		<form id="form-t1" action="" autocomplete="off">
+		<h2>Onboarding Form</h2>
+		<div class="form-grid">
+			<label for="business_name">Business / legal entity name:</label>
+			<input class="disappearing"  name="business_name" id="business_name" type="text" value="business name" required/>
+			<label for="eircode">Eircode: </label>
+			<input class="disappearing"  name="eircode" id="eircode" type="text" value="eircode" required/>
+			<label for="account_holder">Account Holder: </label>
+			<input class="disappearing"  name="account_holder" id="account_holder" type="text" value="Account Holder" required/>
+			<label for="phone_number">Phone Number: </label>
+			<input class="disappearing"  name="phone_number" id="phone_number" type="text" value="Phone number" required/>
+			<label for="website">Official Website</label>
+			<input class="disappearing"  name="website" id="website" type="text" value="Website" required/>
+			<label for="email">Email address</label>
+			<input class="disappearing"  name="email" id="email" type="text" value="Email adress" required />
+			<input class="form_submit" type="submit" value="Submit">
+
+		</div>
+	</form>
+	</template>
+</div>
+<div class="bevel-box" id="form-display"></div>
+<div class="bevel-box">
+	<h2>Already have an account? Login <a href="{{url_for('producer_login')}}">here</a>...</h2>
+</div>
+<div class="bevel-box">
+	<h2 id="output"></h2>
+</div>
+{% endblock %}

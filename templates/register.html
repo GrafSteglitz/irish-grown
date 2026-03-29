@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+{% block title %}Create Account – Irish Grown{% endblock %}
+
+{% block scripts %}
+<style>
+  .flex-container {
+    min-height: calc(100vh - 62px);
+    justify-content: center;
+    align-items: center;
+    padding: 24px 16px;
+    box-sizing: border-box;
+  }
+
+  .reg-wrapper {
+    display: flex;
+    width: 100%;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 28px 72px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.14);
+  }
+
+  /* Left brand panel */
+  .reg-brand-panel {
+    flex: 1;
+    background: linear-gradient(145deg, #0a7a38 0%, #14a356 50%, #1bc467 100%);
+    padding: 48px 40px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+  .reg-brand-panel::before {
+    content: '';
+    position: absolute;
+    top: -30%; right: -20%;
+    width: 130%; height: 130%;
+    background: radial-gradient(circle at 70% 30%, rgba(255,255,255,0.08) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .reg-brand-top { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .reg-brand-top svg { width: 34px; height: 34px; stroke: white; stroke-width: 1.5; fill: none; flex-shrink: 0; }
+  .reg-brand-top h2 { font-size: 1.55rem; margin: 0; text-align: left; }
+  .reg-brand-tagline { font-size: 0.9rem; color: rgba(255,255,255,0.7); font-style: italic; margin: 0 0 36px; }
+  .reg-benefits { display: flex; flex-direction: column; gap: 20px; flex: 1; }
+  .reg-benefit { display: flex; align-items: flex-start; gap: 14px; margin: 0; }
+  .reg-benefit svg { width: 18px; height: 18px; stroke: rgba(255,255,255,0.8); stroke-width: 2; fill: none; flex-shrink: 0; margin-top: 2px; }
+  .reg-benefit-text { font-size: 0.88rem; color: rgba(255,255,255,0.82); line-height: 1.45; }
+  .reg-benefit-text strong { display: block; font-size: 0.93rem; color: white; margin-bottom: 2px; }
+  .reg-brand-footer { font-size: 0.72rem; color: rgba(255,255,255,0.42); margin: 28px 0 0; }
+
+  /* Right form panel */
+  .reg-form-panel {
+    width: 380px;
+    flex-shrink: 0;
+    background: rgba(4, 28, 12, 0.94);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    padding: 44px 38px 40px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+  }
+  .reg-form-panel h1 { font-size: 1.5rem; margin: 0 0 4px; text-align: left; }
+  .reg-subtitle { font-size: 0.87rem; color: rgba(255,255,255,0.5); margin: 0 0 28px; }
+
+  .field { text-align: left; margin-bottom: 15px; margin-left: 0; margin-right: 0; }
+  .field label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 6px;
+  }
+  .field input {
+    display: block;
+    width: 100%;
+    padding: 11px 14px;
+    background: rgba(255,255,255,0.07);
+    border: 1.5px solid rgba(255,255,255,0.16);
+    border-radius: 10px;
+    color: white;
+    font-size: 0.93rem;
+    font-family: inherit;
+    box-sizing: border-box;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  }
+  .field input::placeholder { color: rgba(255,255,255,0.28); }
+  .field input:focus {
+    outline: none;
+    border-color: #1bc467;
+    background: rgba(255,255,255,0.1);
+    box-shadow: 0 0 0 3px rgba(27,196,103,0.18);
+  }
+  .field input.invalid { border-color: rgba(255,100,100,0.6); }
+
+  .btn-register {
+    display: block; width: 100%; padding: 13px; margin-top: 6px;
+    background: linear-gradient(135deg, #14a356 0%, #1bc467 100%);
+    color: white; border: none; border-radius: 10px;
+    font-size: 0.95rem; font-weight: 700; font-family: inherit;
+    letter-spacing: 0.5px; cursor: pointer; box-sizing: border-box;
+    transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+  }
+  .btn-register:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(20,163,86,0.4); filter: brightness(1.08); }
+  .btn-register:disabled { opacity: 0.6; transform: none; cursor: not-allowed; }
+
+  .reg-footer {
+    font-size: 0.82rem; color: rgba(255,255,255,0.48);
+    line-height: 2.1; margin: 20px 0 0; margin-left: 0; margin-right: 0;
+  }
+  .reg-footer a {
+    color: #4cd98a; font-weight: 600; text-decoration: none;
+    border-bottom: 1px solid rgba(76,217,138,0.3);
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .reg-footer a:hover { color: #7de8ab; border-color: rgba(125,232,171,0.55); }
+
+  .error-banner {
+    background: rgba(200,50,50,0.25);
+    border: 1px solid rgba(255,100,100,0.4);
+    border-radius: 9px; padding: 10px 14px;
+    font-size: 0.85rem; color: #ffaaaa;
+    margin: 0 0 16px; margin-left: 0; margin-right: 0;
+  }
+
+  .password-hint {
+    font-size: 0.73rem;
+    color: rgba(255,255,255,0.35);
+    margin: 4px 0 0;
+    margin-left: 0;
+  }
+
+  @media (max-width: 700px) {
+    .reg-wrapper { flex-direction: column; max-width: 440px; }
+    .reg-brand-panel { padding: 32px 28px; }
+    .reg-benefits { display: none; }
+    .reg-form-panel { width: 100%; padding: 32px 28px; }
+  }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const form    = document.getElementById('reg-form');
+  const btn     = document.getElementById('reg-btn');
+  const banner  = document.getElementById('error-banner');
+  const pwInput = document.getElementById('password');
+  const pw2Input= document.getElementById('password2');
+
+  function showError(msg) {
+    banner.textContent = msg;
+    banner.style.display = 'block';
+  }
+  function hideError() { banner.style.display = 'none'; }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideError();
+
+    const name     = document.getElementById('fullname').value.trim();
+    const email    = document.getElementById('email').value.trim();
+    const username = document.getElementById('username').value.trim();
+    const password = pwInput.value;
+    const password2= pw2Input.value;
+
+    if (password !== password2) { showError('Passwords do not match.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Creating account…';
+
+    try {
+      const res = await fetch('/api/auth/customer/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content },
+        body: JSON.stringify({ name, email, username, password })
+      });
+      const data = await res.json();
+      if (data.status === 'success') {
+        window.location.href = '/account';
+      } else {
+        showError(data.message || 'Something went wrong. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Create Account';
+      }
+    } catch {
+      showError('Network error — please check your connection and try again.');
+      btn.disabled = false;
+      btn.textContent = 'Create Account';
+    }
+  });
+});
+</script>
+{% endblock %}
+
+{% block body_content %}
+<div class="reg-wrapper">
+
+  <!-- Left: branding -->
+  <div class="reg-brand-panel">
+    <div>
+      <div class="reg-brand-top">
+        <i data-lucide="sprout"></i>
+        <h2>Irish Grown</h2>
+      </div>
+      <p class="reg-brand-tagline">Fresh from the farm to your door</p>
+    </div>
+    <div class="reg-benefits">
+      <div class="reg-benefit">
+        <i data-lucide="map-pin"></i>
+        <div class="reg-benefit-text">
+          <strong>Shop local, shop fresh</strong>
+          Browse produce sourced directly from trusted farms across all 26 counties of Ireland.
+        </div>
+      </div>
+      <div class="reg-benefit">
+        <i data-lucide="leaf"></i>
+        <div class="reg-benefit-text">
+          <strong>Seasonal &amp; sustainable</strong>
+          Discover what's in season near you — fresher, tastier, and kinder to the planet.
+        </div>
+      </div>
+      <div class="reg-benefit">
+        <i data-lucide="truck"></i>
+        <div class="reg-benefit-text">
+          <strong>Next-day delivery</strong>
+          Order before noon and get fresh produce delivered straight to your door the next morning.
+        </div>
+      </div>
+      <div class="reg-benefit">
+        <i data-lucide="heart"></i>
+        <div class="reg-benefit-text">
+          <strong>Support Irish producers</strong>
+          Every purchase goes directly to a small family farm keeping Ireland's food heritage alive.
+        </div>
+      </div>
+    </div>
+    <p class="reg-brand-footer">© Irish Grown · Supporting local producers across Ireland</p>
+  </div>
+
+  <!-- Right: form -->
+  <div class="reg-form-panel">
+    <h1>Create account</h1>
+    <p class="reg-subtitle">Join thousands of customers buying Irish</p>
+
+    <div class="error-banner" id="error-banner" style="display:none;"></div>
+
+    <form id="reg-form" autocomplete="off" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="field">
+        <label for="fullname">Full name</label>
+        <input id="fullname" name="name" type="text" placeholder="Jane Murphy" required />
+      </div>
+      <div class="field">
+        <label for="email">Email address</label>
+        <input id="email" name="email" type="email" placeholder="jane@example.ie" required />
+      </div>
+      <div class="field">
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" placeholder="janeirish" required />
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" placeholder="Choose a strong password" required />
+        <p class="password-hint">At least 8 characters with a number and symbol.</p>
+      </div>
+      <div class="field">
+        <label for="password2">Confirm password</label>
+        <input id="password2" name="password2" type="password" placeholder="Repeat your password" required />
+      </div>
+      <button type="submit" class="btn-register" id="reg-btn">Create Account</button>
+    </form>
+
+    <div class="reg-footer">
+      <div>Already have an account? <a href="{{ url_for('login') }}">Sign in</a></div>
+      <div>Selling produce? <a href="{{ url_for('producer_onboarding') }}">Join as a producer</a></div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

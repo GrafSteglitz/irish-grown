@@ -1,0 +1,596 @@
+{% extends "base.html" %}
+{% block title %}Admin Analytics – Irish Grown{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  /* ── Layout ─────────────────────────────────────────────────────────────── */
+  .admin-page { max-width:1200px; margin:0 auto; padding:32px 16px 80px; }
+
+  .admin-header {
+    display:flex; align-items:center; justify-content:space-between;
+    flex-wrap:wrap; gap:12px; margin-bottom:28px;
+  }
+  .admin-header h1 { font-size:1.9rem; margin:0; }
+  .admin-header p  { font-size:0.88rem; color:rgba(255,255,255,0.45); margin:4px 0 0; }
+  .refresh-all-btn {
+    display:flex; align-items:center; gap:7px;
+    padding:10px 20px; background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.18); border-radius:10px;
+    color:white; font-family:inherit; font-size:0.88rem; cursor:pointer;
+    transition:background 0.15s;
+  }
+  .refresh-all-btn:hover { background:rgba(255,255,255,0.15); }
+  .refresh-all-btn svg { width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2; }
+
+  /* ── Section titles ──────────────────────────────────────────────────────── */
+  .section-title {
+    font-size:0.7rem; font-weight:700; text-transform:uppercase;
+    letter-spacing:1.2px; color:rgba(255,255,255,0.38); margin:32px 0 14px;
+  }
+
+  /* ── Overview cards ──────────────────────────────────────────────────────── */
+  .kpi-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+    gap:14px; margin-bottom:4px;
+  }
+  .kpi-card {
+    background:rgba(4,20,10,0.88);
+    border:1px solid rgba(255,255,255,0.09);
+    border-radius:14px; padding:18px 20px;
+    display:flex; flex-direction:column; gap:6px;
+  }
+  .kpi-card.accent { border-color:rgba(27,196,103,0.3); background:rgba(10,50,25,0.9); }
+  .kpi-label {
+    font-size:0.67rem; font-weight:700; text-transform:uppercase;
+    letter-spacing:1px; color:rgba(255,255,255,0.38);
+    display:flex; align-items:center; gap:5px;
+  }
+  .kpi-label svg { width:12px; height:12px; stroke:currentColor; fill:none; stroke-width:2; opacity:0.7; }
+  .kpi-value  { font-size:2rem; font-weight:900; color:white; line-height:1; }
+  .kpi-sub    { font-size:0.72rem; color:rgba(255,255,255,0.38); }
+  .kpi-value.green { color:#4cd98a; }
+  .kpi-value.amber { color:#f0c96a; }
+  .kpi-value.red   { color:#ff8080; }
+
+  /* ── Chart panels ────────────────────────────────────────────────────────── */
+  .charts-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(440px,1fr));
+    gap:18px;
+  }
+  @media(max-width:960px) { .charts-grid { grid-template-columns:1fr; } }
+
+  .chart-panel {
+    background:rgba(4,20,10,0.88);
+    border:1px solid rgba(255,255,255,0.09);
+    border-radius:16px; padding:22px 22px 18px;
+  }
+  .chart-panel.wide { grid-column:1/-1; }
+  .chart-panel h3 {
+    font-size:0.82rem; font-weight:700; text-transform:uppercase;
+    letter-spacing:1px; color:rgba(255,255,255,0.45);
+    margin:0 0 18px; display:flex; align-items:center; gap:7px;
+  }
+  .chart-panel h3 svg { width:14px; height:14px; stroke:#1bc467; fill:none; stroke-width:2; }
+  .chart-canvas-wrap { position:relative; height:230px; }
+  .chart-canvas-wrap.tall { height:300px; }
+
+  /* ── Tables ──────────────────────────────────────────────────────────────── */
+  .data-table {
+    width:100%; border-collapse:collapse; font-size:0.83rem;
+  }
+  .data-table th {
+    background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.45);
+    font-size:0.67rem; font-weight:700; text-transform:uppercase; letter-spacing:0.8px;
+    padding:10px 12px; text-align:left; border-bottom:1px solid rgba(255,255,255,0.08);
+  }
+  .data-table td {
+    padding:10px 12px; color:white;
+    border-bottom:1px solid rgba(255,255,255,0.05);
+    vertical-align:middle;
+  }
+  .data-table tbody tr:last-child td { border-bottom:none; }
+  .data-table tbody tr:hover td { background:rgba(255,255,255,0.04); }
+  .status-badge {
+    display:inline-block; padding:2px 9px; border-radius:20px; font-size:0.7rem; font-weight:700;
+    text-transform:capitalize;
+  }
+  .status-pending   { background:rgba(240,201,106,0.15); color:#f0c96a; border:1px solid rgba(240,201,106,0.3); }
+  .status-delivered { background:rgba(27,196,103,0.15);  color:#4cd98a; border:1px solid rgba(27,196,103,0.3);  }
+  .status-shipped   { background:rgba(100,160,255,0.15); color:#a0c0ff; border:1px solid rgba(100,160,255,0.3); }
+  .status-cancelled { background:rgba(255,128,128,0.15); color:#ff9090; border:1px solid rgba(255,128,128,0.3); }
+
+  /* ── Mini bar inside table cells ────────────────────────────────────────── */
+  .mini-bar-wrap { display:flex; align-items:center; gap:8px; }
+  .mini-bar-bg   { flex:1; height:5px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
+  .mini-bar-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,#14a356,#1bc467); }
+  .mini-bar-label{ font-size:0.78rem; color:rgba(255,255,255,0.6); white-space:nowrap; min-width:48px; text-align:right; }
+
+  /* ── Loading / error ─────────────────────────────────────────────────────── */
+  .loading-state { text-align:center; padding:60px 20px; color:rgba(255,255,255,0.3); }
+  .error-banner  {
+    background:rgba(255,80,80,0.12); border:1px solid rgba(255,80,80,0.3);
+    border-radius:12px; padding:16px 20px; color:#ff9090; font-size:0.9rem;
+    margin-bottom:20px; display:none;
+  }
+
+  /* ── Scrollable table wrapper ────────────────────────────────────────────── */
+  .table-scroll { overflow-x:auto; }
+
+  /* ── Delivery method labels ──────────────────────────────────────────────── */
+  .del-badge {
+    display:inline-block; padding:2px 9px; border-radius:20px; font-size:0.7rem;
+    font-weight:700; text-transform:capitalize;
+    background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12);
+    color:rgba(255,255,255,0.6);
+  }
+
+  @media(max-width:600px) {
+    .kpi-grid { grid-template-columns:repeat(2,1fr); }
+    .admin-header { flex-direction:column; align-items:flex-start; }
+  }
+</style>
+{% endblock %}
+
+{% block body_content %}
+<div class="admin-page">
+
+  <div class="admin-header">
+    <div>
+      <h1><i data-lucide="bar-chart-2" style="width:28px;height:28px;vertical-align:middle;stroke:#1bc467;fill:none;stroke-width:2;margin-right:8px;"></i>Analytics &amp; Reporting</h1>
+      <p id="last-updated">Loading…</p>
+    </div>
+    <button class="refresh-all-btn" onclick="loadAnalytics()">
+      <i data-lucide="refresh-cw"></i> Refresh
+    </button>
+  </div>
+
+  <div class="error-banner" id="error-banner"></div>
+
+  <div id="dashboard-content">
+    <div class="loading-state">Loading dashboard data…</div>
+  </div>
+
+</div>
+
+<script>
+/* ── Helpers ───────────────────────────────────────────────────────────────── */
+function _esc(s){ return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmt(n){ return typeof n==='number' ? n.toLocaleString() : (n??'—'); }
+function fmtEuro(n){ return '€' + (Number(n)||0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,','); }
+function fmtDate(s){ if(!s||s==='unknown') return '—'; try{ return new Date(s).toLocaleDateString('en-IE',{day:'numeric',month:'short',year:'numeric'}); }catch(e){return s;} }
+function delLabel(k){
+  const map = {collect_in_person:'Collect in Person',market_pickup:'Market Pick-up',dropoff_box:'Drop-off Box',producer_delivery:'Producer Delivery',unknown:'Unknown'};
+  return map[k] || k;
+}
+
+/* Chart.js global defaults */
+const GRID_COLOR  = 'rgba(255,255,255,0.07)';
+const TICK_COLOR  = 'rgba(255,255,255,0.38)';
+const GREEN_SOLID = '#1bc467';
+const GREEN_LIGHT = 'rgba(27,196,103,0.18)';
+Chart.defaults.color = TICK_COLOR;
+Chart.defaults.font.family = "'Inter', 'Segoe UI', sans-serif";
+Chart.defaults.font.size   = 11;
+
+/* Keep chart instances so we can destroy them on refresh */
+const _charts = {};
+function _destroyAll(){
+  Object.values(_charts).forEach(c => { try{ c.destroy(); }catch(e){} });
+  Object.keys(_charts).forEach(k => delete _charts[k]);
+}
+
+function _makeChart(id, config){
+  if(_charts[id]) _charts[id].destroy();
+  const ctx = document.getElementById(id);
+  if(!ctx) return;
+  _charts[id] = new Chart(ctx, config);
+}
+
+/* ── Render ────────────────────────────────────────────────────────────────── */
+function renderDashboard(d){
+  const ov = d.overview;
+  const content = document.getElementById('dashboard-content');
+  content.innerHTML = `
+    <!-- KPI cards -->
+    <div class="section-title"><i data-lucide="activity" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;vertical-align:middle;margin-right:4px;"></i> Overview</div>
+    <div class="kpi-grid">
+      <div class="kpi-card accent">
+        <div class="kpi-label"><i data-lucide="euro"></i> Total Revenue</div>
+        <div class="kpi-value green">${fmtEuro(ov.total_revenue)}</div>
+        <div class="kpi-sub">${fmt(ov.total_orders)} orders · avg ${fmtEuro(ov.avg_order_value)}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label"><i data-lucide="shopping-basket"></i> Orders</div>
+        <div class="kpi-value">${fmt(ov.total_orders)}</div>
+        <div class="kpi-sub">avg ${fmtEuro(ov.avg_order_value)} per order</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label"><i data-lucide="users"></i> Customers</div>
+        <div class="kpi-value">${fmt(ov.total_customers)}</div>
+        <div class="kpi-sub">registered accounts</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label"><i data-lucide="store"></i> Producers</div>
+        <div class="kpi-value">${fmt(ov.total_producers)}</div>
+        <div class="kpi-sub">listed on platform</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label"><i data-lucide="package"></i> Products</div>
+        <div class="kpi-value">${fmt(ov.total_products)}</div>
+        <div class="kpi-sub">${fmt(ov.out_of_stock_products)} out of stock</div>
+      </div>
+      <div class="kpi-card ${ov.low_stock_products > 0 ? 'accent' : ''}">
+        <div class="kpi-label"><i data-lucide="alert-triangle"></i> Low Stock</div>
+        <div class="kpi-value ${ov.low_stock_products > 0 ? 'amber' : ''}">${fmt(ov.low_stock_products)}</div>
+        <div class="kpi-sub">products ≤ 5 units left</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label"><i data-lucide="map-pin"></i> Markets</div>
+        <div class="kpi-value">${fmt(ov.active_markets)}</div>
+        <div class="kpi-sub">nationwide listed</div>
+      </div>
+    </div>
+
+    <!-- Row 1: Revenue over time + Delivery breakdown -->
+    <div class="section-title"><i data-lucide="trending-up" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;vertical-align:middle;margin-right:4px;"></i> Sales &amp; Orders</div>
+    <div class="charts-grid">
+      <div class="chart-panel wide">
+        <h3><i data-lucide="trending-up"></i> Revenue &amp; Order Volume Over Time</h3>
+        <div class="chart-canvas-wrap">
+          <canvas id="chart-revenue"></canvas>
+        </div>
+      </div>
+      <div class="chart-panel">
+        <h3><i data-lucide="truck"></i> Delivery Method Breakdown</h3>
+        <div class="chart-canvas-wrap">
+          <canvas id="chart-delivery"></canvas>
+        </div>
+      </div>
+      <div class="chart-panel">
+        <h3><i data-lucide="tag"></i> Category Breakdown</h3>
+        <div class="chart-canvas-wrap">
+          <canvas id="chart-categories"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: Top products + Top producers -->
+    <div class="section-title"><i data-lucide="award" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;vertical-align:middle;margin-right:4px;"></i> Top Performers</div>
+    <div class="charts-grid">
+      <div class="chart-panel">
+        <h3><i data-lucide="package"></i> Top Products by Units Sold</h3>
+        <div class="chart-canvas-wrap tall">
+          <canvas id="chart-products"></canvas>
+        </div>
+      </div>
+      <div class="chart-panel">
+        <h3><i data-lucide="store"></i> Top Producers by Revenue</h3>
+        <div class="chart-canvas-wrap tall">
+          <canvas id="chart-producers"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3: Producer geography + Customer growth -->
+    <div class="section-title"><i data-lucide="map" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;vertical-align:middle;margin-right:4px;"></i> Geography &amp; Growth</div>
+    <div class="charts-grid">
+      <div class="chart-panel">
+        <h3><i data-lucide="map-pin"></i> Producers by County</h3>
+        <div class="chart-canvas-wrap tall">
+          <canvas id="chart-producer-counties"></canvas>
+        </div>
+      </div>
+      <div class="chart-panel">
+        <h3><i data-lucide="users"></i> Customer Registrations (Cumulative)</h3>
+        <div class="chart-canvas-wrap tall">
+          <canvas id="chart-customer-growth"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Market attendance -->
+    ${d.market_attendance.length > 0 ? `
+    <div class="section-title"><i data-lucide="store" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;vertical-align:middle;margin-right:4px;"></i> Market Attendance</div>
+    <div class="chart-panel wide" style="margin-bottom:18px;">
+      <h3><i data-lucide="store"></i> Producers per Market</h3>
+      <div class="chart-canvas-wrap" style="height:${Math.max(200, d.market_attendance.length*32)}px;">
+        <canvas id="chart-markets"></canvas>
+      </div>
+    </div>` : ''}
+
+    <!-- Recent orders table -->
+    <div class="section-title"><i data-lucide="clock" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;vertical-align:middle;margin-right:4px;"></i> Recent Orders</div>
+    <div class="chart-panel wide">
+      <h3><i data-lucide="shopping-basket"></i> Last ${d.recent_orders.length} Orders</h3>
+      <div class="table-scroll">
+        ${_buildOrdersTable(d.recent_orders)}
+      </div>
+    </div>
+
+    <!-- Top products table -->
+    <div class="section-title"><i data-lucide="list" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;vertical-align:middle;margin-right:4px;"></i> Product Performance</div>
+    <div class="chart-panel wide">
+      <h3><i data-lucide="package"></i> All Products — Units Sold &amp; Revenue</h3>
+      <div class="table-scroll">
+        ${_buildProductTable(d.top_products)}
+      </div>
+    </div>
+
+    <!-- Top producers table -->
+    <div class="chart-panel wide" style="margin-top:18px;">
+      <h3><i data-lucide="store"></i> All Producers — Orders &amp; Revenue</h3>
+      <div class="table-scroll">
+        ${_buildProducerTable(d.top_producers)}
+      </div>
+    </div>
+  `;
+
+  lucide.createIcons();
+
+  /* Draw charts after DOM is updated */
+  requestAnimationFrame(() => {
+    _drawRevenue(d.orders_by_date);
+    _drawDelivery(d.delivery_counts);
+    _drawCategories(d.category_breakdown);
+    _drawProducts(d.top_products.slice(0,8));
+    _drawProducers(d.top_producers.slice(0,8));
+    _drawProducerCounties(d.producer_counties);
+    _drawCustomerGrowth(d.customer_growth);
+    if(d.market_attendance.length > 0) _drawMarkets(d.market_attendance);
+  });
+}
+
+/* ── Table builders ─────────────────────────────────────────────────────── */
+function _buildOrdersTable(orders){
+  if(!orders.length) return '<p style="color:rgba(255,255,255,0.35);font-size:0.88rem;padding:8px 0;">No orders yet.</p>';
+  return `<table class="data-table">
+    <thead><tr>
+      <th>Order ID</th><th>Customer</th><th>Date</th><th>Items</th>
+      <th>Total</th><th>Delivery</th><th>Status</th>
+    </tr></thead>
+    <tbody>${orders.map(o => `<tr>
+      <td style="font-family:monospace;opacity:0.7;">#${_esc(String(o.id))}</td>
+      <td>${_esc(o.customer)}</td>
+      <td>${fmtDate(o.date)}</td>
+      <td style="text-align:center;">${fmt(o.item_count)}</td>
+      <td style="font-weight:700;color:#4cd98a;">${fmtEuro(o.total)}</td>
+      <td><span class="del-badge">${_esc(delLabel(o.delivery_method))}</span></td>
+      <td><span class="status-badge status-${_esc((o.status||'').toLowerCase())}">${_esc(o.status||'—')}</span></td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+function _buildProductTable(products){
+  if(!products.length) return '<p style="color:rgba(255,255,255,0.35);font-size:0.88rem;padding:8px 0;">No product data yet.</p>';
+  const maxQty = Math.max(...products.map(p=>p.qty), 1);
+  return `<table class="data-table">
+    <thead><tr><th>Product</th><th>Orders</th><th>Units Sold</th><th>Revenue</th></tr></thead>
+    <tbody>${products.map(p => `<tr>
+      <td>${_esc(p.name)}</td>
+      <td style="text-align:center;">${fmt(p.orders)}</td>
+      <td>
+        <div class="mini-bar-wrap">
+          <div class="mini-bar-bg"><div class="mini-bar-fill" style="width:${Math.round(p.qty/maxQty*100)}%"></div></div>
+          <span class="mini-bar-label">${fmt(p.qty)}</span>
+        </div>
+      </td>
+      <td style="font-weight:700;color:#4cd98a;">${fmtEuro(p.revenue)}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+function _buildProducerTable(producers){
+  if(!producers.length) return '<p style="color:rgba(255,255,255,0.35);font-size:0.88rem;padding:8px 0;">No producer order data yet.</p>';
+  const maxRev = Math.max(...producers.map(p=>p.revenue), 1);
+  return `<table class="data-table">
+    <thead><tr><th>Producer</th><th>Orders</th><th>Units Sold</th><th>Revenue</th></tr></thead>
+    <tbody>${producers.map(p => `<tr>
+      <td><a href="/producers/${_esc(p.username)}" style="color:white;text-decoration:none;">${_esc(p.business_name)}</a></td>
+      <td style="text-align:center;">${fmt(p.orders)}</td>
+      <td style="text-align:center;">${fmt(p.qty)}</td>
+      <td>
+        <div class="mini-bar-wrap">
+          <div class="mini-bar-bg"><div class="mini-bar-fill" style="width:${Math.round(p.revenue/maxRev*100)}%"></div></div>
+          <span class="mini-bar-label">${fmtEuro(p.revenue)}</span>
+        </div>
+      </td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+/* ── Chart drawing functions ────────────────────────────────────────────── */
+const PIE_COLORS = [
+  '#1bc467','#14a356','#0a7a38','#4cd98a',
+  '#f0c96a','#f5a623','#e87c3e','#a0c0ff',
+  '#c084fc','#fb7185','#67e8f9','#86efac',
+];
+
+function _drawRevenue(data){
+  if(!data.length) return;
+  const labels  = data.map(d => fmtDate(d.date));
+  const revenue = data.map(d => d.revenue);
+  const counts  = data.map(d => d.count);
+  _makeChart('chart-revenue', {
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        { label:'Revenue (€)', data:revenue, backgroundColor:GREEN_LIGHT, borderColor:GREEN_SOLID,
+          borderWidth:2, borderRadius:5, yAxisID:'y', order:2 },
+        { label:'Orders',      data:counts,  type:'line', borderColor:'rgba(160,192,255,0.8)',
+          backgroundColor:'transparent', borderWidth:2, pointRadius:3, tension:0.4, yAxisID:'y1', order:1 },
+      ],
+    },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ labels:{ boxWidth:10 } } },
+      scales:{
+        x:{ grid:{ color:GRID_COLOR }, ticks:{ maxTicksLimit:8, maxRotation:0 } },
+        y:{ grid:{ color:GRID_COLOR }, position:'left',
+            ticks:{ callback: v => '€'+v } },
+        y1:{ grid:{ display:false }, position:'right',
+             ticks:{ stepSize:1 } },
+      },
+    },
+  });
+}
+
+function _drawDelivery(counts){
+  const keys   = Object.keys(counts);
+  if(!keys.length) return;
+  const labels = keys.map(delLabel);
+  const vals   = keys.map(k => counts[k]);
+  _makeChart('chart-delivery', {
+    type:'doughnut',
+    data:{ labels, datasets:[{ data:vals, backgroundColor:PIE_COLORS, borderWidth:0 }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'62%',
+      plugins:{ legend:{ position:'bottom', labels:{ padding:14, boxWidth:10 } } } },
+  });
+}
+
+function _drawCategories(cats){
+  if(!cats.length) return;
+  _makeChart('chart-categories', {
+    type:'doughnut',
+    data:{
+      labels: cats.map(c => c.category),
+      datasets:[{ data:cats.map(c=>c.qty), backgroundColor:PIE_COLORS, borderWidth:0 }],
+    },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'58%',
+      plugins:{ legend:{ position:'bottom', labels:{ padding:14, boxWidth:10 } } } },
+  });
+}
+
+function _drawProducts(products){
+  if(!products.length) return;
+  _makeChart('chart-products', {
+    type:'bar',
+    data:{
+      labels: products.map(p => p.name.length>22 ? p.name.slice(0,20)+'…' : p.name),
+      datasets:[{ label:'Units sold', data:products.map(p=>p.qty),
+        backgroundColor:PIE_COLORS, borderWidth:0, borderRadius:5 }],
+    },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{
+        x:{ grid:{ color:GRID_COLOR }, ticks:{ stepSize:1 } },
+        y:{ grid:{ display:false } },
+      },
+    },
+  });
+}
+
+function _drawProducers(producers){
+  if(!producers.length) return;
+  _makeChart('chart-producers', {
+    type:'bar',
+    data:{
+      labels: producers.map(p => (p.business_name||p.username).length>22 ? (p.business_name||p.username).slice(0,20)+'…' : (p.business_name||p.username)),
+      datasets:[{ label:'Revenue (€)', data:producers.map(p=>p.revenue),
+        backgroundColor:PIE_COLORS.map((_,i)=>PIE_COLORS[(i+3)%PIE_COLORS.length]),
+        borderWidth:0, borderRadius:5 }],
+    },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{
+        x:{ grid:{ color:GRID_COLOR }, ticks:{ callback: v => '€'+v } },
+        y:{ grid:{ display:false } },
+      },
+    },
+  });
+}
+
+function _drawProducerCounties(counties){
+  if(!counties.length) return;
+  const top = counties.slice(0,12);
+  _makeChart('chart-producer-counties', {
+    type:'bar',
+    data:{
+      labels: top.map(c=>c.county),
+      datasets:[{ label:'Producers', data:top.map(c=>c.count),
+        backgroundColor:GREEN_LIGHT, borderColor:GREEN_SOLID, borderWidth:2, borderRadius:5 }],
+    },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{
+        x:{ grid:{ color:GRID_COLOR }, ticks:{ stepSize:1 } },
+        y:{ grid:{ display:false } },
+      },
+    },
+  });
+}
+
+function _drawCustomerGrowth(growth){
+  if(!growth.length) return;
+  _makeChart('chart-customer-growth', {
+    type:'line',
+    data:{
+      labels: growth.map(g=>fmtDate(g.date)),
+      datasets:[{ label:'Registered customers', data:growth.map(g=>g.cumulative),
+        borderColor:GREEN_SOLID, backgroundColor:GREEN_LIGHT,
+        fill:true, tension:0.3, pointRadius:4 }],
+    },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{
+        x:{ grid:{ color:GRID_COLOR } },
+        y:{ grid:{ color:GRID_COLOR }, ticks:{ stepSize:1 } },
+      },
+    },
+  });
+}
+
+function _drawMarkets(attendance){
+  if(!attendance.length) return;
+  _makeChart('chart-markets', {
+    type:'bar',
+    data:{
+      labels: attendance.map(m=>m.name),
+      datasets:[{ label:'Producers attending', data:attendance.map(m=>m.producer_count),
+        backgroundColor:PIE_COLORS, borderWidth:0, borderRadius:5 }],
+    },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{
+        x:{ grid:{ color:GRID_COLOR }, ticks:{ stepSize:1 } },
+        y:{ grid:{ display:false } },
+      },
+    },
+  });
+}
+
+/* ── Load data ──────────────────────────────────────────────────────────── */
+async function loadAnalytics(){
+  const errorBanner = document.getElementById('error-banner');
+  const lastUpdated = document.getElementById('last-updated');
+  errorBanner.style.display = 'none';
+  lastUpdated.textContent   = 'Refreshing…';
+  _destroyAll();
+
+  try {
+    const res  = await fetch('/api/admin/analytics');
+    if(res.status === 403) {
+      errorBanner.textContent = 'Access denied — admin login required.';
+      errorBanner.style.display = 'block';
+      document.getElementById('dashboard-content').innerHTML = '';
+      return;
+    }
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    renderDashboard(data);
+    lastUpdated.textContent = 'Last updated: ' + new Date().toLocaleTimeString('en-IE');
+  } catch(err) {
+    console.error('Analytics load failed:', err);
+    errorBanner.textContent = 'Failed to load analytics data. ' + err.message;
+    errorBanner.style.display = 'block';
+    lastUpdated.textContent   = 'Failed to load.';
+  }
+}
+
+/* Auto-load on page ready */
+document.addEventListener('DOMContentLoaded', loadAnalytics);
+</script>
+{% endblock %}

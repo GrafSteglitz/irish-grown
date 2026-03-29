@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+{% block title %}Producer – Irish Grown{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<style>
+  .profile-page { max-width: 1000px; margin: 0 auto; padding: 32px 16px 60px; }
+  .profile-page > * { margin-left: 0 !important; margin-right: 0 !important; }
+
+  /* Hero */
+  .profile-hero {
+    background: linear-gradient(135deg, #0a7a38 0%, #14a356 55%, #1bc467 100%);
+    border-radius: 20px; padding: 48px 44px; position: relative;
+    overflow: hidden; margin-bottom: 28px; display: flex; gap: 32px; align-items: flex-start;
+  }
+  .profile-hero::before {
+    content:''; position:absolute; top:-30%; right:-10%;
+    width:140%; height:140%;
+    background:radial-gradient(circle at 75% 30%, rgba(255,255,255,0.08) 0%, transparent 55%);
+    pointer-events:none;
+  }
+  .profile-hero-icon {
+    width:80px; height:80px; border-radius:50%;
+    background:rgba(255,255,255,0.18); border:2px solid rgba(255,255,255,0.35);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .profile-hero-icon svg { width:40px; height:40px; stroke:white; fill:none; stroke-width:1.5; }
+  .profile-hero-info { flex:1; }
+  .profile-hero-info > * { margin:0 !important; }
+  .profile-hero-info h1 { font-size:2rem; margin:0 0 6px !important; text-align:left; }
+  .profile-location { display:flex; align-items:center; gap:6px; color:rgba(255,255,255,0.75); font-size:0.92rem; margin-bottom:12px !important; }
+  .profile-location svg { width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2; }
+  .profile-desc { font-size:0.92rem; color:rgba(255,255,255,0.82); line-height:1.6; max-width:520px; }
+  .profile-cats { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px !important; }
+  .profile-cat { font-size:0.75rem; background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.35); border-radius:12px; padding:3px 12px; font-weight:700; }
+  .profile-contact { display:flex; flex-direction:column; gap:6px; flex-shrink:0; background:rgba(0,0,0,0.18); border-radius:14px; padding:16px 20px; font-size:0.83rem; color:rgba(255,255,255,0.75); min-width:180px; }
+  .profile-contact > * { margin:0 !important; }
+  .profile-contact-item { display:flex; align-items:center; gap:8px; }
+  .profile-contact-item svg { width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2; flex-shrink:0; }
+
+  /* Breadcrumb */
+  .breadcrumb { display:flex; align-items:center; gap:6px; font-size:0.82rem; color:rgba(255,255,255,0.4); margin-bottom:20px; }
+  .breadcrumb a { color:rgba(255,255,255,0.5); text-decoration:none; transition:color 0.15s; }
+  .breadcrumb a:hover { color:#4cd98a; }
+  .breadcrumb svg { width:12px; height:12px; stroke:currentColor; fill:none; stroke-width:2; }
+
+  /* Products section */
+  .products-section h2 { font-size:1.2rem; margin:0 0 20px; text-align:left; display:flex; align-items:center; gap:10px; }
+  .products-section h2 svg { width:20px; height:20px; stroke:#1bc467; fill:none; stroke-width:2; }
+
+  .products-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:18px; }
+
+  .product-tile {
+    background:rgba(4,28,12,0.82); backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,0.12); border-radius:16px;
+    overflow:hidden; display:flex; flex-direction:column;
+    transition:transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  }
+  .product-tile:hover { transform:translateY(-3px); box-shadow:0 12px 32px rgba(0,0,0,0.3); border-color:rgba(27,196,103,0.3); }
+  .product-tile-img {
+    width:100%; height:160px; object-fit:cover;
+    background:rgba(255,255,255,0.06);
+  }
+  .product-tile-img-placeholder {
+    width:100%; height:160px;
+    background:linear-gradient(135deg,#0a4a22 0%,#0e6b30 100%);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .product-tile-img-placeholder svg { width:52px; height:52px; stroke:rgba(255,255,255,0.25); fill:none; stroke-width:1.2; }
+  .product-tile-body { padding:16px 16px 0; flex:1; display:flex; flex-direction:column; gap:6px; }
+  .product-tile-body > * { margin:0 !important; }
+  .product-tile-name { font-size:0.98rem; font-weight:700; color:white; line-height:1.3; }
+  .product-tile-desc { font-size:0.8rem; color:rgba(255,255,255,0.5); line-height:1.45; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .product-tile-price { font-size:1.15rem; font-weight:800; color:#4cd98a; margin-top:4px !important; }
+  .stock-badge {
+    display:inline-flex; align-items:center; gap:5px;
+    font-size:0.72rem; font-weight:700;
+    padding:2px 9px; border-radius:10px; width:fit-content;
+  }
+  .stock-in    { background:rgba(27,196,103,0.15); color:#4cd98a; border:1px solid rgba(27,196,103,0.3); }
+  .stock-low   { background:rgba(255,165,0,0.15);  color:#ffa500; border:1px solid rgba(255,165,0,0.3); }
+  .stock-out   { background:rgba(255,80,80,0.15);  color:#ff8080; border:1px solid rgba(255,80,80,0.3); }
+
+  .product-tile-footer { padding:12px 16px 16px; display:flex; align-items:center; gap:8px; }
+  .product-tile-footer > * { margin:0 !important; }
+  .qty-input {
+    width:52px; padding:8px 6px; text-align:center;
+    background:rgba(255,255,255,0.08); border:1.5px solid rgba(255,255,255,0.16);
+    border-radius:8px; color:white; font-family:inherit; font-size:0.9rem;
+    transition:border-color 0.2s;
+  }
+  .qty-input:focus { outline:none; border-color:#1bc467; }
+  .add-cart-btn {
+    flex:1; padding:9px 12px;
+    background:linear-gradient(135deg,#14a356 0%,#1bc467 100%);
+    color:white; border:none; border-radius:9px;
+    font-family:inherit; font-size:0.88rem; font-weight:700;
+    cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;
+    transition:transform 0.15s, filter 0.15s;
+  }
+  .add-cart-btn:hover { transform:translateY(-1px); filter:brightness(1.08); }
+  .add-cart-btn:disabled { opacity:0.5; transform:none; cursor:not-allowed; }
+  .add-cart-btn svg { width:15px; height:15px; stroke:white; fill:none; stroke-width:2.5; }
+
+  .no-products {
+    text-align:center; padding:60px 20px; color:rgba(255,255,255,0.35);
+    background:rgba(4,28,12,0.5); border:1px solid rgba(255,255,255,0.08); border-radius:16px;
+  }
+  .no-products svg { width:48px; height:48px; stroke:rgba(255,255,255,0.15); fill:none; stroke-width:1.2; margin-bottom:12px; }
+  .loading-placeholder { text-align:center; padding:60px 20px; color:rgba(255,255,255,0.35); }
+
+  @media (max-width:680px) {
+    .profile-hero { flex-direction:column; padding:28px 24px; }
+    .profile-contact { width:100%; box-sizing:border-box; }
+  }
+</style>
+{% endblock %}
+
+{% block body_content %}
+<div class="profile-page" id="profile-page" data-username="{{ username }}">
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a href="/producers">Producers</a>
+    <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+    <span id="breadcrumb-name">…</span>
+  </div>
+
+  <!-- Hero placeholder populated by JS -->
+  <div id="profile-hero-container">
+    <div class="loading-placeholder">Loading producer…</div>
+  </div>
+
+  <!-- Products section populated by JS -->
+  <div id="products-section-container"></div>
+</div>
+
+<script>
+function _escHtml(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function addToCart(productId, qtyInputId, btn) {
+  const qty = parseInt(document.getElementById(qtyInputId)?.value) || 1;
+  btn.disabled = true;
+  btn.innerHTML = '<i data-lucide="loader"></i> Adding…';
+  lucide.createIcons();
+  cartAdd(productId, qty).then(() => {
+    btn.disabled = false;
+    btn.innerHTML = '<i data-lucide="shopping-basket"></i> Add to Cart';
+    lucide.createIcons();
+  });
+}
+
+function _stockBadge(stock) {
+  const s = parseInt(stock) || 0;
+  if (s <= 0)  return `<span class="stock-badge stock-out">● Out of stock</span>`;
+  if (s <= 10) return `<span class="stock-badge stock-low">● Low stock (${s} left)</span>`;
+  return `<span class="stock-badge stock-in">● In stock</span>`;
+}
+
+function _renderProductTile(p) {
+  const stock = parseInt(p.stock) || 0;
+  const imgHtml = p.image
+    ? `<img class="product-tile-img" src="/static/${_escHtml(p.image)}" alt="${_escHtml(p.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+       <div class="product-tile-img-placeholder" style="display:none"><i data-lucide="image"></i></div>`
+    : `<div class="product-tile-img-placeholder"><i data-lucide="image"></i></div>`;
+  const footerHtml = stock > 0
+    ? `<input class="qty-input" type="number" value="1" min="1" max="${stock}" id="qty-${p.id}" />
+       <button class="add-cart-btn" onclick="addToCart(${p.id}, 'qty-${p.id}', this)">
+         <i data-lucide="shopping-basket"></i> Add to Cart
+       </button>`
+    : `<button class="add-cart-btn" disabled style="flex:1">Out of Stock</button>`;
+
+  const div = document.createElement('div');
+  div.className = 'product-tile';
+  div.innerHTML = `
+    ${imgHtml}
+    <div class="product-tile-body">
+      <div class="product-tile-name">${_escHtml(p.name)}</div>
+      ${p.description ? `<div class="product-tile-desc">${_escHtml(p.description)}</div>` : ''}
+      <div class="product-tile-price">€${parseFloat(p.price || 0).toFixed(2)}</div>
+      ${_stockBadge(p.stock)}
+    </div>
+    <div class="product-tile-footer">${footerHtml}</div>`;
+  return div;
+}
+
+async function loadProfile() {
+  const username = document.getElementById('profile-page').dataset.username;
+  const heroContainer     = document.getElementById('profile-hero-container');
+  const productsContainer = document.getElementById('products-section-container');
+
+  try {
+    const res  = await fetch(`/api/producers/${encodeURIComponent(username)}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Not found');
+
+    const p = data.producer;
+    document.title = `${p.business_name} – Irish Grown`;
+    document.getElementById('breadcrumb-name').textContent = p.business_name;
+
+    // Contact items
+    const contactItems = [];
+    if (p.telephone) contactItems.push(`<div class="profile-contact-item"><i data-lucide="phone"></i><span>${_escHtml(p.telephone)}</span></div>`);
+    if (p.eircode)   contactItems.push(`<div class="profile-contact-item"><i data-lucide="mail-open"></i><span>${_escHtml(p.eircode)}</span></div>`);
+    contactItems.push(`<div class="profile-contact-item"><i data-lucide="calendar"></i><span>Since ${_escHtml((p.joined || '').slice(0,4) || 'N/A')}</span></div>`);
+
+    const locationStr = p.county
+      ? `${_escHtml(p.county)}, Ireland${p.address ? ' · ' + _escHtml(p.address) : ''}`
+      : 'Ireland';
+
+    heroContainer.innerHTML = `
+      <div class="profile-hero">
+        <div class="profile-hero-icon"><i data-lucide="sprout"></i></div>
+        <div class="profile-hero-info">
+          <h1>${_escHtml(p.business_name)}</h1>
+          <div class="profile-location"><i data-lucide="map-pin"></i><span>${locationStr}</span></div>
+          <p class="profile-desc">${_escHtml(p.description)}</p>
+          <div class="profile-cats">${(p.categories || []).map(c => `<span class="profile-cat">${_escHtml(c)}</span>`).join('')}</div>
+        </div>
+        <div class="profile-contact">${contactItems.join('')}</div>
+      </div>`;
+
+    // Products section
+    const products = data.products || [];
+    let productsHtml;
+    if (products.length) {
+      const grid = document.createElement('div');
+      grid.className = 'products-grid';
+      products.forEach(prod => grid.appendChild(_renderProductTile(prod)));
+      const section = document.createElement('div');
+      section.className = 'products-section';
+      section.innerHTML = `<h2><i data-lucide="package"></i> Products from ${_escHtml(p.business_name)}</h2>`;
+      section.appendChild(grid);
+      productsContainer.appendChild(section);
+    } else {
+      productsContainer.innerHTML = `
+        <div class="products-section">
+          <h2><i data-lucide="package"></i> Products from ${_escHtml(p.business_name)}</h2>
+          <div class="no-products"><i data-lucide="package-open"></i><p>This producer has no listed products yet.</p></div>
+        </div>`;
+    }
+
+    lucide.createIcons();
+  } catch (err) {
+    heroContainer.innerHTML = `<div class="loading-placeholder">Failed to load producer profile.</div>`;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadProfile);
+</script>
+{% endblock %}

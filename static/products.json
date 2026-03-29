@@ -1,0 +1,320 @@
+[
+  {
+    "id": 1,
+    "name": "Farm Fresh Eggs",
+    "stock": 120,
+    "image": "eggs.png",
+    "producer": "ocallagh_farm",
+    "price": 4.5
+  },
+  {
+    "id": 2,
+    "name": "Martin's Organic Sourdough",
+    "stock": 35,
+    "image": "sourdough.png",
+    "producer": "martinbakery",
+    "price": 5.0
+  },
+  {
+    "id": 3,
+    "name": "Caheragh Organic Honey",
+    "stock": 75,
+    "image": "honey.png",
+    "price": 8.99,
+    "producer": "caheragh_farm"
+  },
+  {
+    "id": 4,
+    "name": "Organic Rye Flour",
+    "stock": 250,
+    "image": "flour.png",
+    "producer": "martinbakery",
+    "price": 2.8
+  },
+  {
+    "id": 5,
+    "name": "Organic Carrots",
+    "stock": 200,
+    "image": "carrots.png",
+    "producer": "gordons_hill",
+    "price": 1.8
+  },
+  {
+    "id": 6,
+    "name": "Organic Potatoes",
+    "stock": 500,
+    "image": "potatoes.png",
+    "producer": "gordons_hill",
+    "price": 2.2
+  },
+  {
+    "id": 7,
+    "name": "Organic Onions",
+    "stock": 300,
+    "image": "onions.png",
+    "producer": "gordons_hill",
+    "price": 1.5
+  },
+  {
+    "id": 8,
+    "name": "Organic Kale",
+    "stock": 50,
+    "image": "kale.png",
+    "producer": "gordons_hill",
+    "price": 2.0
+  },
+  {
+    "id": 9,
+    "name": "Organic Spinach",
+    "stock": 80,
+    "image": "spinach.png",
+    "producer": "gordons_hill",
+    "price": 2.1
+  },
+  {
+    "id": 10,
+    "name": "Organic Broccoli",
+    "stock": 60,
+    "image": "broccoli.png",
+    "producer": "gordons_hill",
+    "price": 2.3
+  },
+  {
+    "id": 11,
+    "name": "Organic Cauliflower",
+    "stock": 40,
+    "image": "cauliflower.png",
+    "producer": "gordons_hill",
+    "price": 2.5
+  },
+  {
+    "id": 12,
+    "name": "Organic Beetroot",
+    "stock": 90,
+    "image": "beetroot.png",
+    "producer": "gordons_hill",
+    "price": 1.9
+  },
+  {
+    "id": 13,
+    "name": "Organic Cabbage",
+    "stock": 70,
+    "image": "cabbage.png",
+    "producer": "gordons_hill",
+    "price": 1.8
+  },
+  {
+    "id": 14,
+    "name": "Organic Leeks",
+    "stock": 45,
+    "image": "leeks.png",
+    "producer": "gordons_hill",
+    "price": 2.0
+  },
+  {
+    "id": 15,
+    "name": "Organic Tomatoes",
+    "stock": 150,
+    "image": "tomatoes.png",
+    "price": 2.4,
+    "producer": "gordons_hill"
+  },
+  {
+    "id": 16,
+    "name": "Organic Cucumber",
+    "stock": 100,
+    "image": "cucumber.png",
+    "price": 1.6,
+    "producer": "gordons_hill"
+  },
+  {
+    "id": 17,
+    "name": "Organic Peppers",
+    "stock": 120,
+    "image": "peppers.png",
+    "price": 2.2,
+    "producer": "gordons_hill"
+  },
+  {
+    "id": 18,
+    "name": "Organic Lettuce",
+    "stock": 80,
+    "image": "lettuce.png",
+    "price": 1.7,
+    "producer": "gordons_hill"
+  },
+  {
+    "id": 19,
+    "name": "Organic Zucchini",
+    "stock": 60,
+    "image": "zucchini.png",
+    "price": 2.1,
+    "producer": "gordons_hill"
+  },
+  {
+    "id": 20,
+    "name": "Organic Pumpkin",
+    "stock": 30,
+    "image": "pumpkin.png",
+    "price": 3.5,
+    "producer": "gordons_hill"
+  },
+  {
+    "id": 21,
+    "name": "Organic Apples",
+    "stock": 300,
+    "image": "apples.png",
+    "price": 3.8,
+    "producer": "burren_botanicals"
+  },
+  {
+    "id": 22,
+    "name": "Organic Pears",
+    "stock": 200,
+    "image": "pears.png",
+    "price": 3.6,
+    "producer": "burren_botanicals"
+  },
+  {
+    "id": 23,
+    "name": "Organic Strawberries",
+    "stock": 100,
+    "image": "strawberries.png",
+    "price": 4.5,
+    "producer": "ocallagh_farm"
+  },
+  {
+    "id": 24,
+    "name": "Organic Blueberries",
+    "stock": 80,
+    "image": "blueberries.png",
+    "price": 5.2,
+    "producer": "ocallagh_farm"
+  },
+  {
+    "id": 25,
+    "name": "Organic Raspberries",
+    "stock": 60,
+    "image": "raspberries.png",
+    "price": 4.8,
+    "producer": "ocallagh_farm"
+  },
+  {
+    "id": 26,
+    "name": "Organic Milk",
+    "stock": 100,
+    "image": "milk.png",
+    "price": 1.8,
+    "producer": "connemara_creamery"
+  },
+  {
+    "id": 27,
+    "name": "Organic Cheese",
+    "stock": 50,
+    "image": "cheese.png",
+    "price": 7.5,
+    "producer": "connemara_creamery"
+  },
+  {
+    "id": 28,
+    "name": "Organic Yogurt",
+    "stock": 80,
+    "image": "yogurt.png",
+    "price": 2.8,
+    "producer": "connemara_creamery"
+  },
+  {
+    "id": 29,
+    "name": "Organic Butter",
+    "stock": 120,
+    "image": "butter.png",
+    "price": 4.2,
+    "producer": "connemara_creamery"
+  },
+  {
+    "id": 30,
+    "name": "Organic Beef",
+    "stock": 40,
+    "image": "beef.png",
+    "price": 14.99,
+    "producer": "kavanagh_farm"
+  },
+  {
+    "id": 31,
+    "name": "Organic Chicken",
+    "stock": 60,
+    "image": "chicken.png",
+    "price": 9.99,
+    "producer": "kavanagh_farm"
+  },
+  {
+    "id": 32,
+    "name": "Organic Lamb",
+    "stock": 30,
+    "image": "lamb.png",
+    "price": 12.99,
+    "producer": "kavanagh_farm"
+  },
+  {
+    "id": 33,
+    "name": "Organic Pork",
+    "stock": 50,
+    "image": "pork.png",
+    "price": 10.99,
+    "producer": "kavanagh_farm"
+  },
+  {
+    "id": 34,
+    "name": "Donegal Smoked Salmon (200g)",
+    "stock": 30,
+    "image": "eggs.png",
+    "producer": "mulroy_smokehouse",
+    "price": 11.99,
+    "description": "Wild-caught Atlantic salmon, oak-smoked over 24 hours on the Donegal coast."
+  },
+  {
+    "id": 35,
+    "name": "Oak-Smoked Mackerel Fillets",
+    "stock": 25,
+    "image": "eggs.png",
+    "producer": "mulroy_smokehouse",
+    "price": 7.5,
+    "description": "Fresh Atlantic mackerel, brined and cold-smoked over oak chips."
+  },
+  {
+    "id": 36,
+    "name": "Connemara Aged Cheddar",
+    "stock": 20,
+    "image": "eggs.png",
+    "producer": "connemara_creamery",
+    "price": 9.99,
+    "description": "12-month aged Irish cheddar with a sharp, nutty flavour."
+  },
+  {
+    "id": 37,
+    "name": "Burren Herb Rapeseed Oil (250ml)",
+    "stock": 40,
+    "image": "eggs.png",
+    "producer": "burren_botanicals",
+    "price": 6.99,
+    "description": "Cold-pressed rapeseed oil infused with fresh rosemary and thyme from the Burren."
+  },
+  {
+    "id": 38,
+    "name": "Caheragh Blackberry Jam",
+    "stock": 35,
+    "image": "blackberry_honey.png",
+    "producer": "caheragh_farm",
+    "price": 4.5,
+    "description": "Wild blackberry jam made with fruit hand-picked from Caheragh hedgerows."
+  },
+  {
+    "id": 39,
+    "name": "Martin's Spelt Loaf",
+    "stock": 18,
+    "image": "wholemeal_bread.png",
+    "producer": "martinbakery",
+    "price": 5.5,
+    "description": "Stone-ground spelt sourdough with a crackly crust and open crumb."
+  }
+]

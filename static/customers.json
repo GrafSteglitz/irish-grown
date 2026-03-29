@@ -1,0 +1,41 @@
+[
+  {
+    "username": "oskar",
+    "name": "Oskar Bukolt",
+    "email": "oskarbukolt@gmail.com",
+    "password_hash": "scrypt:32768:8:1$szNtEmx85mAYn8VS$9319dc3b2fe8959de6e98838ad6bc72bd5a2417469189713168ce497249b69f3ee994d986e8da54830a543dce13b0655f1b82db811e7b4ef7662f805ad748dd9",
+    "joined": "2026-03-12",
+    "orders": [
+      {
+        "id": 1,
+        "date": "2026-03-16 18:36",
+        "total": 12.99,
+        "status": "pending",
+        "items": 1
+      }
+    ]
+  },
+  {
+    "username": "admin",
+    "name": "Admin User",
+    "email": "admin@irishgrown.ie",
+    "password_hash": "scrypt:32768:8:1$VdnJYUmROCmKHSze$d664c355a1aae8fa660e84689d79f141f9c2d1cd61278e946af49d584c1978a1d05cd76a8f54fe541d28c5f0d6ee6c8aef124ffd7e92ec95e71331a8278311ef",
+    "joined": "2026-01-01",
+    "orders": [
+      {
+        "id": 2,
+        "date": "2026-03-16 18:41",
+        "total": 8.49,
+        "status": "pending",
+        "items": 1
+      },
+      {
+        "id": 3,
+        "date": "2026-03-18 21:15",
+        "total": 4.5,
+        "status": "pending",
+        "items": 1
+      }
+    ]
+  }
+]

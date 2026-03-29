@@ -1,0 +1,646 @@
+{% extends "base.html" %}
+{% block title %}
+Join as a Producer – Irish Grown
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  .flex-container {
+    min-height: calc(100vh - 60px);
+    justify-content: center;
+    align-items: center;
+    padding: 32px 16px;
+    box-sizing: border-box;
+  }
+
+  /* ── Onboarding card ────────────────────────────────────────── */
+  .onboarding-card {
+    width: 100%;
+    max-width: 540px;
+    margin: 0 auto;
+    background: rgba(4, 28, 12, 0.94);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 24px;
+    padding: 44px 48px 40px;
+    box-shadow: 0 28px 72px rgba(0,0,0,0.5);
+  }
+
+  /* ── Header ─────────────────────────────────────────────────── */
+  .onboarding-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .onboarding-header svg { width: 28px; height: 28px; stroke: #1bc467; stroke-width: 1.5; fill: none; }
+  .onboarding-header h2 { font-size: 1.4rem; margin: 0; color: white; }
+  .onboarding-tagline { font-size: 0.85rem; color: rgba(255,255,255,0.5); margin: 0 0 32px; }
+
+  /* ── Step indicator ─────────────────────────────────────────── */
+  .step-indicator {
+    display: flex;
+    align-items: center;
+    margin-bottom: 36px;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .step-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: background 0.3s, border-color 0.3s, color 0.3s;
+    border: 2px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.4);
+    background: transparent;
+  }
+  .step-dot.active {
+    background: linear-gradient(135deg, #14a356, #1bc467);
+    border-color: transparent;
+    color: white;
+  }
+  .step-dot.done {
+    background: rgba(27,196,103,0.2);
+    border-color: #1bc467;
+    color: #1bc467;
+  }
+  .step-line {
+    flex: 1;
+    height: 2px;
+    background: rgba(255,255,255,0.1);
+    margin: 0 8px;
+    transition: background 0.3s;
+  }
+  .step-line.done { background: rgba(27,196,103,0.5); }
+  .step-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: rgba(255,255,255,0.35);
+    text-align: center;
+    margin-top: 6px;
+    display: block;
+  }
+  .step-dot.active + * .step-label,
+  .step-wrapper.active .step-label { color: rgba(255,255,255,0.75); }
+  .step-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ── Step panels ────────────────────────────────────────────── */
+  .step-panel { display: none; }
+  .step-panel.active { display: block; animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateX(12px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .step-title { font-size: 1.2rem; margin: 0 0 4px; }
+  .step-sub   { font-size: 0.85rem; color: rgba(255,255,255,0.5); margin: 0 0 28px; }
+
+  /* ── Fields ─────────────────────────────────────────────────── */
+  .field { text-align: left; margin-bottom: 18px; margin-left: 0; margin-right: 0; }
+  .field label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 7px;
+  }
+  .field input, .field textarea, .field select {
+    display: block;
+    width: 100%;
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.07);
+    border: 1.5px solid rgba(255,255,255,0.16);
+    border-radius: 10px;
+    color: white;
+    font-size: 0.95rem;
+    font-family: inherit;
+    box-sizing: border-box;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  }
+  .field textarea { resize: vertical; min-height: 90px; }
+  .field input::placeholder, .field textarea::placeholder { color: rgba(255,255,255,0.28); }
+  .field input:focus, .field textarea:focus, .field select:focus {
+    outline: none;
+    border-color: #1bc467;
+    background: rgba(255,255,255,0.1);
+    box-shadow: 0 0 0 3px rgba(27,196,103,0.18);
+  }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-left: 0; margin-right: 0; }
+
+  /* ── Password requirements ──────────────────────────────────── */
+  .pw-rules {
+    margin: -8px 0 16px;
+    margin-left: 0;
+    margin-right: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 16px;
+  }
+  .pw-rule {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.35);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.2s;
+  }
+  .pw-rule svg { width: 11px; height: 11px; stroke: currentColor; stroke-width: 2.5; fill: none; flex-shrink: 0; }
+  .pw-rule.met { color: #1bc467; }
+
+  /* ── Categories checkboxes ──────────────────────────────────── */
+  .categories-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 18px;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .category-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.06);
+    border: 1.5px solid rgba(255,255,255,0.14);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    user-select: none;
+    margin: 0;
+  }
+  .category-chip:hover { background: rgba(255,255,255,0.1); }
+  .category-chip input[type="checkbox"] { display: none; }
+  .category-chip.checked {
+    background: rgba(27,196,103,0.15);
+    border-color: rgba(27,196,103,0.5);
+  }
+  .category-chip svg { width: 14px; height: 14px; stroke: rgba(255,255,255,0.55); stroke-width: 2; fill: none; flex-shrink: 0; }
+  .category-chip.checked svg { stroke: #1bc467; }
+  .category-chip span { font-size: 0.85rem; color: rgba(255,255,255,0.75); }
+  .category-chip.checked span { color: white; }
+  .cat-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,0.55); margin-bottom: 10px; display: block; }
+
+  /* ── Buttons ────────────────────────────────────────────────── */
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .btn-next {
+    flex: 1;
+    padding: 13px;
+    background: linear-gradient(135deg, #14a356 0%, #1bc467 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: filter 0.15s, transform 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+  }
+  .btn-next svg { width: 15px; height: 15px; stroke: currentColor; stroke-width: 2.5; fill: none; }
+  .btn-next:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  .btn-next:active { transform: translateY(0); filter: brightness(0.95); }
+  .btn-back {
+    padding: 13px 20px;
+    background: transparent;
+    color: rgba(255,255,255,0.6);
+    border: 1.5px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-back svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fill: none; }
+  .btn-back:hover { background: rgba(255,255,255,0.08); color: white; }
+
+  /* ── Error / success banners ────────────────────────────────── */
+  .banner {
+    border-radius: 9px;
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    margin: 0 0 18px;
+    margin-left: 0;
+    margin-right: 0;
+    display: none;
+  }
+  .banner.error   { background: rgba(200,50,50,0.25); border: 1px solid rgba(255,100,100,0.4); color: #ffaaaa; }
+  .banner.success { background: rgba(27,196,103,0.15); border: 1px solid rgba(27,196,103,0.4); color: #7de8ab; }
+  .banner.visible { display: block; }
+
+  /* ── Step 4: complete ───────────────────────────────────────── */
+  .complete-panel {
+    text-align: center;
+    padding: 16px 0;
+  }
+  .complete-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #14a356, #1bc467);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+  }
+  .complete-icon svg { width: 36px; height: 36px; stroke: white; stroke-width: 2; fill: none; }
+  .complete-panel h3 { font-size: 1.4rem; margin: 0 0 8px; }
+  .complete-panel p { color: rgba(255,255,255,0.6); margin: 0 0 28px; font-size: 0.9rem; }
+
+  @media (max-width: 560px) {
+    .onboarding-card { padding: 32px 24px; }
+    .field-row { grid-template-columns: 1fr; }
+    .categories-grid { grid-template-columns: 1fr; }
+    .pw-rules { grid-template-columns: 1fr; }
+  }
+</style>
+<script>
+  window.addEventListener('load', () => lucide.createIcons());
+</script>
+{% endblock %}
+
+{% block body_content %}
+<div class="onboarding-card">
+
+  <div class="onboarding-header">
+    <i data-lucide="sprout"></i>
+    <h2>Irish Grown</h2>
+  </div>
+  <p class="onboarding-tagline">Join hundreds of Irish producers reaching local customers</p>
+
+  <!-- Step indicator -->
+  <div class="step-indicator">
+    <div class="step-wrapper">
+      <div class="step-dot active" id="dot-1">1</div>
+      <span class="step-label">Account</span>
+    </div>
+    <div class="step-line" id="line-1"></div>
+    <div class="step-wrapper">
+      <div class="step-dot" id="dot-2">2</div>
+      <span class="step-label">Business</span>
+    </div>
+    <div class="step-line" id="line-2"></div>
+    <div class="step-wrapper">
+      <div class="step-dot" id="dot-3">3</div>
+      <span class="step-label">Products</span>
+    </div>
+  </div>
+
+  <div id="banner" class="banner error"></div>
+
+  <!-- Step 1: Account -->
+  <div class="step-panel active" id="step-1">
+    <h3 class="step-title">Create your account</h3>
+    <p class="step-sub">Choose a username and a strong password to secure your portal.</p>
+
+    <div class="field">
+      <label for="username">Username</label>
+      <input type="text" id="username" placeholder="e.g. murphyfarm" maxlength="30" autocomplete="off" />
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Min. 8 characters" autocomplete="new-password" />
+    </div>
+    <div class="pw-rules">
+      <span class="pw-rule" id="rule-len"><i data-lucide="circle"></i> 8–30 characters</span>
+      <span class="pw-rule" id="rule-upper"><i data-lucide="circle"></i> Uppercase letter</span>
+      <span class="pw-rule" id="rule-lower"><i data-lucide="circle"></i> Lowercase letter</span>
+      <span class="pw-rule" id="rule-digit"><i data-lucide="circle"></i> Number</span>
+      <span class="pw-rule" id="rule-special"><i data-lucide="circle"></i> Special character</span>
+    </div>
+    <div class="field">
+      <label for="confirm-password">Confirm Password</label>
+      <input type="password" id="confirm-password" placeholder="Repeat your password" autocomplete="new-password" />
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-next" id="btn-step1">Continue <i data-lucide="arrow-right"></i></button>
+    </div>
+    <div style="margin-top: 18px; font-size: 0.82rem; color: rgba(255,255,255,0.45); text-align: center; margin-left:0; margin-right:0;">
+      Already have an account? <a href="{{ url_for('producer_login') }}" style="color:#4cd98a; font-weight:600; text-decoration:none; border-bottom: 1px solid rgba(76,217,138,0.3);">Sign in</a>
+    </div>
+  </div>
+
+  <!-- Step 2: Business details -->
+  <div class="step-panel" id="step-2">
+    <h3 class="step-title">Your business details</h3>
+    <p class="step-sub">Tell us about your farm or business so customers can find you.</p>
+
+    <div class="field">
+      <label for="biz-name">Business / Farm Name</label>
+      <input type="text" id="biz-name" placeholder="e.g. Murphy's Family Farm" />
+    </div>
+    <div class="field">
+      <label for="biz-address">Address</label>
+      <input type="text" id="biz-address" placeholder="Street or townland, town" />
+    </div>
+    <div class="field-row">
+      <div class="field" style="margin-bottom:0;">
+        <label for="biz-eircode">Eircode</label>
+        <input type="text" id="biz-eircode" placeholder="e.g. P85 AB12" maxlength="8" />
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label for="biz-county">County</label>
+        <select id="biz-county">
+          <option value="" disabled selected>Select county</option>
+          {% for county in ['Carlow','Cavan','Clare','Cork','Donegal','Dublin','Galway','Kerry','Kildare','Kilkenny','Laois','Leitrim','Limerick','Longford','Louth','Mayo','Meath','Monaghan','Offaly','Roscommon','Sligo','Tipperary','Waterford','Westmeath','Wexford','Wicklow'] %}
+          <option value="{{ county }}">{{ county }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="field" style="margin-top: 18px;">
+      <label for="biz-phone">Telephone</label>
+      <input type="tel" id="biz-phone" placeholder="e.g. 087 123 4567" />
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-back" id="btn-back-2"><i data-lucide="arrow-left"></i> Back</button>
+      <button class="btn-next" id="btn-step2">Continue <i data-lucide="arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- Step 3: Products -->
+  <div class="step-panel" id="step-3">
+    <h3 class="step-title">What will you sell?</h3>
+    <p class="step-sub">Select the categories that best describe your produce.</p>
+
+    <span class="cat-label">Categories</span>
+    <div class="categories-grid" id="categories-grid">
+      <label class="category-chip">
+        <input type="checkbox" value="Vegetables &amp; Greens"> <i data-lucide="leaf"></i> <span>Vegetables &amp; Greens</span>
+      </label>
+      <label class="category-chip">
+        <input type="checkbox" value="Fruit &amp; Berries"> <i data-lucide="cherry"></i> <span>Fruit &amp; Berries</span>
+      </label>
+      <label class="category-chip">
+        <input type="checkbox" value="Dairy &amp; Eggs"> <i data-lucide="milk"></i> <span>Dairy &amp; Eggs</span>
+      </label>
+      <label class="category-chip">
+        <input type="checkbox" value="Meat &amp; Poultry"> <i data-lucide="beef"></i> <span>Meat &amp; Poultry</span>
+      </label>
+      <label class="category-chip">
+        <input type="checkbox" value="Fish &amp; Seafood"> <i data-lucide="fish"></i> <span>Fish &amp; Seafood</span>
+      </label>
+      <label class="category-chip">
+        <input type="checkbox" value="Baked Goods"> <i data-lucide="wheat"></i> <span>Baked Goods</span>
+      </label>
+      <label class="category-chip">
+        <input type="checkbox" value="Honey &amp; Preserves"> <i data-lucide="droplets"></i> <span>Honey &amp; Preserves</span>
+      </label>
+      <label class="category-chip">
+        <input type="checkbox" value="Drinks &amp; Juices"> <i data-lucide="cup-soda"></i> <span>Drinks &amp; Juices</span>
+      </label>
+      <label class="category-chip">
+        <input type="checkbox" value="Artisan &amp; Specialty"> <i data-lucide="award"></i> <span>Artisan &amp; Specialty</span>
+      </label>
+      <label class="category-chip">
+        <input type="checkbox" value="Herbs &amp; Plants"> <i data-lucide="flower-2"></i> <span>Herbs &amp; Plants</span>
+      </label>
+    </div>
+
+    <div class="field">
+      <label for="biz-desc">About your business <span style="font-weight:400; text-transform:none; letter-spacing:0;">(optional)</span></label>
+      <textarea id="biz-desc" placeholder="Briefly describe your farm, your methods, and what makes your produce special..."></textarea>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-back" id="btn-back-3"><i data-lucide="arrow-left"></i> Back</button>
+      <button class="btn-next" id="btn-step3">Create Account <i data-lucide="check"></i></button>
+    </div>
+  </div>
+
+  <!-- Step 4: Complete -->
+  <div class="step-panel" id="step-4">
+    <div class="complete-panel">
+      <div class="complete-icon"><i data-lucide="check"></i></div>
+      <h3>Welcome aboard!</h3>
+      <p>Your producer account has been created. You're being taken to your dashboard now.</p>
+      <a href="{{ url_for('producer_dashboard') }}" class="btn-next" style="display:inline-flex; text-decoration:none; padding: 13px 32px;">
+        Go to Dashboard <i data-lucide="arrow-right"></i>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  let currentStep = 1;
+  let accountData = {};
+  let businessData = {};
+  const csrfToken = "{{ csrf_token() }}";
+
+  // ── Helpers ──────────────────────────────────────────────────
+  function showBanner(msg, type = 'error') {
+    const el = document.getElementById('banner');
+    el.textContent = msg;
+    el.className = `banner ${type} visible`;
+  }
+  function hideBanner() {
+    const el = document.getElementById('banner');
+    el.className = 'banner error';
+  }
+
+  function goToStep(n) {
+    document.getElementById(`step-${currentStep}`).classList.remove('active');
+    // Update dots
+    const prev = document.getElementById(`dot-${currentStep}`);
+    prev.classList.remove('active');
+    prev.classList.add('done');
+    prev.innerHTML = '<i data-lucide="check"></i>';
+
+    // Update connecting line
+    if (currentStep < 3) {
+      document.getElementById(`line-${currentStep}`).classList.add('done');
+    }
+
+    currentStep = n;
+    document.getElementById(`step-${n}`).classList.add('active');
+    const cur = document.getElementById(`dot-${n}`);
+    cur.classList.remove('done');
+    cur.classList.add('active');
+    hideBanner();
+    lucide.createIcons();
+  }
+
+  function goBack(n) {
+    document.getElementById(`step-${currentStep}`).classList.remove('active');
+    const cur = document.getElementById(`dot-${currentStep}`);
+    cur.classList.remove('active');
+
+    currentStep = n;
+    document.getElementById(`step-${n}`).classList.add('active');
+    const prev = document.getElementById(`dot-${n}`);
+    prev.classList.remove('done');
+    prev.classList.add('active');
+    prev.textContent = n;
+
+    // Undo line
+    if (n < 3) {
+      document.getElementById(`line-${n}`).classList.remove('done');
+    }
+    hideBanner();
+    lucide.createIcons();
+  }
+
+  // ── Password strength ────────────────────────────────────────
+  document.getElementById('password').addEventListener('input', function () {
+    const v = this.value;
+    setRule('rule-len',     v.length >= 8 && v.length <= 30);
+    setRule('rule-upper',   /[A-Z]/.test(v));
+    setRule('rule-lower',   /[a-z]/.test(v));
+    setRule('rule-digit',   /\d/.test(v));
+    setRule('rule-special', /[!@#$%^&*]/.test(v));
+  });
+  function setRule(id, met) {
+    const el = document.getElementById(id);
+    el.classList.toggle('met', met);
+    const icon = el.querySelector('i');
+    if (icon) {
+      icon.setAttribute('data-lucide', met ? 'check-circle' : 'circle');
+      lucide.createIcons();
+    }
+  }
+
+  // ── Category chips ───────────────────────────────────────────
+  document.querySelectorAll('.category-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const cb = chip.querySelector('input[type="checkbox"]');
+      cb.checked = !cb.checked;
+      chip.classList.toggle('checked', cb.checked);
+    });
+  });
+
+  // ── Step 1: account ──────────────────────────────────────────
+  document.getElementById('btn-step1').addEventListener('click', async () => {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const confirm  = document.getElementById('confirm-password').value;
+
+    if (!username) return showBanner('Please enter a username.');
+    if (!password) return showBanner('Please enter a password.');
+    if (password !== confirm) return showBanner('Passwords do not match.');
+
+    const btn = document.getElementById('btn-step1');
+    btn.textContent = 'Checking…';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch('/api/auth/producer/onboarding/account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (data.status === 'error') {
+        showBanner(data.message);
+      } else {
+        accountData = { username, password };
+        goToStep(2);
+      }
+    } catch (e) {
+      showBanner('Network error. Please try again.');
+    } finally {
+      btn.innerHTML = 'Continue <i data-lucide="arrow-right"></i>';
+      btn.disabled = false;
+      lucide.createIcons();
+    }
+  });
+
+  // ── Step 2: business ─────────────────────────────────────────
+  document.getElementById('btn-back-2').addEventListener('click', () => goBack(1));
+
+  document.getElementById('btn-step2').addEventListener('click', () => {
+    const name    = document.getElementById('biz-name').value.trim();
+    const address = document.getElementById('biz-address').value.trim();
+    const eircode = document.getElementById('biz-eircode').value.trim().toUpperCase();
+    const county  = document.getElementById('biz-county').value;
+    const phone   = document.getElementById('biz-phone').value.trim();
+
+    if (!name)    return showBanner('Please enter your business name.');
+    if (!address) return showBanner('Please enter your address.');
+    if (!eircode) return showBanner('Please enter your Eircode.');
+    if (!county)  return showBanner('Please select your county.');
+    if (!phone)   return showBanner('Please enter a telephone number.');
+
+    businessData = { name, address, eircode, county, phone };
+    goToStep(3);
+  });
+
+  // ── Step 3: products ─────────────────────────────────────────
+  document.getElementById('btn-back-3').addEventListener('click', () => goBack(2));
+
+  document.getElementById('btn-step3').addEventListener('click', async () => {
+    const categories = [...document.querySelectorAll('.category-chip input:checked')]
+                         .map(cb => cb.value);
+    const description = document.getElementById('biz-desc').value.trim();
+
+    if (categories.length === 0) return showBanner('Please select at least one product category.');
+
+    const btn = document.getElementById('btn-step3');
+    btn.textContent = 'Creating account…';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch('/api/auth/producer/onboarding/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        body: JSON.stringify({ ...accountData, ...businessData, categories, description })
+      });
+
+      let data;
+      try {
+        data = await res.json();
+      } catch (_) {
+        // Server returned a non-JSON response (e.g. a 500 HTML error page)
+        showBanner(`Server error (${res.status}) — your details are safe. Please try again.`, 'error');
+        return;
+      }
+
+      if (!res.ok || data.status === 'error') {
+        showBanner(data.message || 'Something went wrong. Please try again.');
+      } else {
+        goToStep(4);
+      }
+    } catch (e) {
+      // Genuine network failure (offline, timeout, etc.)
+      showBanner('Could not reach the server. Check your connection and try again.');
+    } finally {
+      btn.innerHTML = 'Create Account <i data-lucide="check"></i>';
+      btn.disabled = false;
+      lucide.createIcons();
+    }
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,12 @@
+[project]
+name = "irish-grown-flask"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.13"
+dependencies = [
+    "dotenv>=0.9.9",
+    "flask>=3.1.2",
+    "flask-wtf>=1.2.2",
+    "psycopg2>=2.9.11",
+    "supabase>=2.27.2",
+]

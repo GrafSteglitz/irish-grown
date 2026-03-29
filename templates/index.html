@@ -1,0 +1,696 @@
+{% extends "base.html" %}
+{% block title %}
+Irish Grown – Fresh from Ireland's Finest Producers
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='search.css') }}">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script type="module">
+	import { initSearch } from "{{ url_for('static', filename='search.js') }}";
+	window.addEventListener("load", () => {
+		initSearch('product-search', 'search-results');
+		lucide.createIcons();
+	});
+</script>
+<style>
+  /* Hero */
+  .hero {
+    text-align: center;
+    padding: 56px 24px 48px;
+    background: linear-gradient(135deg, #0a7a38 0%, #14a356 55%, #1bc467 100%);
+    border-radius: var(--bevel-radius);
+    border: 2px solid rgba(255,255,255,0.25);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    left: -30%;
+    width: 180%;
+    height: 180%;
+    background: radial-gradient(circle at 60% 40%, rgba(255,255,255,0.07) 0%, transparent 55%);
+    pointer-events: none;
+  }
+  .hero h1 {
+    font-size: 3.2rem;
+    margin: 8px 0;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.25);
+    letter-spacing: 1px;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.45);
+    border-radius: 20px;
+    padding: 5px 18px;
+    font-size: 0.9rem;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+  }
+  .hero .tagline {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    margin: 0 auto 32px;
+    max-width: 560px;
+    font-style: italic;
+  }
+  .cta-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .btn-primary {
+    background: white;
+    color: #0a7a38;
+    padding: 14px 36px;
+    border-radius: 30px;
+    font-size: 1.05rem;
+    font-weight: bold;
+    text-decoration: none;
+    display: inline-block;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    color: #0a7a38;
+  }
+  .btn-secondary {
+    background: transparent;
+    color: white;
+    border: 2px solid rgba(255,255,255,0.8);
+    padding: 12px 36px;
+    border-radius: 30px;
+    font-size: 1.05rem;
+    font-weight: bold;
+    text-decoration: none;
+    display: inline-block;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .btn-secondary:hover {
+    transform: translateY(-3px);
+    background: rgba(255,255,255,0.15);
+    color: white;
+  }
+
+  /* Stats */
+  .stats-bar {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 20px 8px;
+  }
+  .stat-item { text-align: center; padding: 8px 20px; }
+  .stat-number { font-size: 2rem; font-weight: 800; display: block; }
+  .stat-label { font-size: 0.85rem; opacity: 0.85; }
+  .stat-divider { width: 1px; height: 40px; background: rgba(255,255,255,0.3); }
+
+  /* Nav cards */
+  .nav-grid {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+    padding: 24px;
+  }
+  .nav-card {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 16px;
+    padding: 20px 12px;
+    text-align: center;
+    text-decoration: none;
+    color: white;
+    display: block;
+    transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+  }
+  .nav-card:hover {
+    transform: translateY(-4px);
+    background: rgba(255,255,255,0.2);
+    box-shadow: 0 10px 28px rgba(0,0,0,0.2);
+    color: white;
+  }
+  .nav-card .icon { display: flex; justify-content: center; margin-bottom: 10px; }
+  .nav-card .icon svg { width: 30px; height: 30px; stroke: rgba(255,255,255,0.88); stroke-width: 1.5; fill: none; }
+  .nav-card .nav-title { font-size: 1.05rem; font-weight: bold; display: block; }
+  .nav-card .nav-desc { font-size: 0.78rem; opacity: 0.8; display: block; margin-top: 4px; }
+
+  /* Product carousel */
+  .carousel-outer {
+    position: relative;
+    margin: 0 24px;
+  }
+  .carousel-wrapper { overflow: hidden; }
+  .carousel-track {
+    display: flex;
+    gap: 16px;
+    transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+  .product-card {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 16px;
+    padding: 20px 14px;
+    flex: 0 0 calc(33.333% - 11px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    box-sizing: border-box;
+  }
+  .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+  }
+  a.product-card { text-decoration: none; color: inherit; }
+  .product-card img {
+    width: 120px !important;
+    max-width: 120px !important;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 2px solid rgba(255,255,255,0.3);
+  }
+  .product-card h3 { text-align: center; font-size: 1rem; margin: 0; }
+  .product-card p  { text-align: center; font-size: 0.85rem; opacity: 0.9; margin: 0; }
+  .product-badge {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 12px;
+    padding: 2px 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+  }
+  .product-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .star-rating { color: #ffd700; }
+  .producer-name { font-size: 0.78rem; opacity: 0.8; }
+
+  /* Carousel arrows */
+  .carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: background 0.2s, transform 0.2s;
+    backdrop-filter: blur(6px);
+    margin: 0;
+  }
+  .carousel-arrow:hover { background: rgba(255,255,255,0.3); transform: translateY(-50%) scale(1.1); }
+  .carousel-arrow svg  { width: 18px; height: 18px; stroke: white; stroke-width: 2.5; fill: none; }
+  .carousel-arrow.prev { left: -28px; }
+  .carousel-arrow.next { right: -28px; }
+
+  /* Carousel dots */
+  .carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 7px;
+    margin: 18px 0 0;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .carousel-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    cursor: pointer;
+    transition: background 0.25s, transform 0.25s;
+    border: none;
+    padding: 0;
+  }
+  .carousel-dot.active { background: white; transform: scale(1.35); }
+
+  /* Map */
+  .map-section { margin-top: 28px; }
+  .map-section h3 { text-align: center; margin-bottom: 14px; }
+  .map-section iframe {
+    width: 100%;
+    height: 320px;
+    border-radius: 14px;
+    border: 2px solid rgba(255,255,255,0.3);
+    display: block;
+  }
+
+  /* Section headings */
+  .section-subtext {
+    text-align: center;
+    opacity: 0.85;
+    margin: -8px 0 20px;
+    font-style: italic;
+  }
+
+  /* Why section */
+  .features-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+    margin-top: 20px;
+  }
+  .feature-item {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+  }
+  .feature-item .icon { display: flex; justify-content: center; margin-bottom: 12px; }
+  .feature-item .icon svg { width: 32px; height: 32px; stroke: rgba(255,255,255,0.88); stroke-width: 1.5; fill: none; }
+  .feature-item h3 { margin: 0 0 8px; font-size: 1rem; }
+
+  /* Lucide in product badges and map heading */
+  .product-badge svg { width: 13px; height: 13px; stroke: currentColor; stroke-width: 2; fill: none; vertical-align: middle; margin-right: 3px; }
+  .map-section h3 svg { width: 18px; height: 18px; stroke: white; stroke-width: 1.75; fill: none; vertical-align: middle; margin-right: 6px; }
+  .hero-badge svg { width: 14px; height: 14px; stroke: white; stroke-width: 2; fill: none; vertical-align: middle; margin-right: 5px; }
+  .feature-item p { font-size: 0.85rem; opacity: 0.85; margin: 0; }
+
+  /* Testimonials */
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 20px;
+  }
+  .testimonial-card {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 14px;
+    padding: 20px;
+  }
+  .testimonial-card .stars { color: #ffd700; margin-bottom: 8px; }
+  .testimonial-card .quote { font-style: italic; font-size: 0.95rem; margin: 0 0 12px; }
+  .testimonial-card .author { font-weight: bold; font-size: 0.82rem; opacity: 0.85; }
+
+  /* Search section */
+  .search-section { text-align: center; }
+  .search-section h1 { margin-bottom: 6px; }
+  .search-subtext { opacity: 0.8; font-style: italic; font-size: 0.95rem; margin: 0 0 24px; }
+
+  .search-form {
+    display: flex;
+    align-items: center;
+    max-width: 600px;
+    margin: 0 auto;
+    background: rgba(255,255,255,0.12);
+    border: 2px solid rgba(255,255,255,0.28);
+    border-radius: 50px;
+    padding: 6px 6px 6px 20px;
+    gap: 8px;
+    position: relative;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  }
+  .search-form:focus-within {
+    border-color: rgba(255,255,255,0.65);
+    background: rgba(255,255,255,0.17);
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.07);
+  }
+  .search-icon-wrap {
+    display: flex;
+    align-items: center;
+    opacity: 0.55;
+    flex-shrink: 0;
+  }
+  .search-icon-wrap svg { width: 18px; height: 18px; stroke: white; stroke-width: 2; fill: none; }
+  #product-search {
+    flex: 1 !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    color: white !important;
+    font-size: 1rem !important;
+    font-family: inherit !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 10px 0 !important;
+    text-align: left !important;
+    outline: none !important;
+    min-width: 0 !important;
+  }
+  .search-go-btn {
+    background: white;
+    color: #0a7a38;
+    border: none;
+    border-radius: 40px;
+    padding: 10px 26px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.15s, box-shadow 0.15s;
+    white-space: nowrap;
+  }
+  .search-go-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+  }
+
+  @media (max-width: 768px) {
+    .features-grid, .testimonials-grid { grid-template-columns: 1fr; }
+    .nav-grid { grid-template-columns: 1fr 1fr; grid-template-rows: auto; }
+    .product-container { flex-direction: column; }
+    .hero h1 { font-size: 2.2rem; }
+    .stat-divider { display: none; }
+  }
+</style>
+{% endblock %}
+
+{% block body_content %}
+
+  <!-- Hero -->
+  <div class="hero">
+    <span class="hero-badge"><i data-lucide="shield-check"></i> 100% Irish Produce</span>
+    <h1>Irish Grown</h1>
+    <p class="tagline">Fresh from the farm to your table — connecting you with Ireland's finest small producers</p>
+    <div class="cta-buttons">
+      <a href="{{ url_for('producers') }}" class="btn-primary">Shop Now</a>
+      <a href="{{ url_for('producer_onboarding') }}" class="btn-secondary">Join as a Producer</a>
+    </div>
+  </div>
+
+  <!-- Stats bar -->
+  <div class="bevel-box stats-bar">
+    <div class="stat-item">
+      <span class="stat-number">50+</span>
+      <span class="stat-label">Local Producers</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-number">200+</span>
+      <span class="stat-label">Fresh Products</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-number">26</span>
+      <span class="stat-label">Counties Covered</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-number">1,200+</span>
+      <span class="stat-label">Happy Customers</span>
+    </div>
+  </div>
+
+  <!-- Navigation grid -->
+  <div class="bevel-box nav-grid">
+    <a href="{{ url_for('login') }}" class="nav-card">
+      <span class="icon"><i data-lucide="log-in"></i></span>
+      <span class="nav-title">Login</span>
+      <span class="nav-desc">Access your account</span>
+    </a>
+    <a href="{{ url_for('producer_onboarding') }}" class="nav-card">
+      <span class="icon"><i data-lucide="user-plus"></i></span>
+      <span class="nav-title">Join as a Producer</span>
+      <span class="nav-desc">Sell your produce</span>
+    </a>
+    <a href="#" class="nav-card">
+      <span class="icon"><i data-lucide="info"></i></span>
+      <span class="nav-title">About Us</span>
+      <span class="nav-desc">Our story &amp; mission</span>
+    </a>
+    <a href="#featured" class="nav-card">
+      <span class="icon"><i data-lucide="star"></i></span>
+      <span class="nav-title">Featured Products</span>
+      <span class="nav-desc">Handpicked favourites</span>
+    </a>
+    <a href="#" class="nav-card">
+      <span class="icon"><i data-lucide="pen-line"></i></span>
+      <span class="nav-title">Blog</span>
+      <span class="nav-desc">Tips, recipes &amp; news</span>
+    </a>
+    <a href="{{ url_for('producers') }}" class="nav-card">
+      <span class="icon"><i data-lucide="sprout"></i></span>
+      <span class="nav-title">Explore Producers</span>
+      <span class="nav-desc">Browse local farms</span>
+    </a>
+  </div>
+
+  <!-- Featured products -->
+  <div class="bevel-box" id="featured">
+    <h1>Featured Products</h1>
+    <p class="section-subtext">Sourced directly from Irish farms and artisan producers near you</p>
+
+    <div class="carousel-outer">
+      <button class="carousel-arrow prev" id="carousel-prev" aria-label="Previous"><i data-lucide="chevron-left"></i></button>
+      <button class="carousel-arrow next" id="carousel-next" aria-label="Next"><i data-lucide="chevron-right"></i></button>
+
+      <div class="carousel-wrapper">
+        <div class="carousel-track" id="carousel-track">
+
+          <a href="{{ url_for('producers') }}" class="product-card">
+            <span class="product-badge"><i data-lucide="leaf"></i> Farm Fresh</span>
+            <img src="{{ url_for('static', filename='eggs.png') }}" alt="Farm fresh eggs">
+            <h3>Farm Fresh Eggs</h3>
+            <p>Free-range eggs from the O'Callaghans' family farm, Co. Cavan.</p>
+            <div class="product-meta">
+              <span class="star-rating">★★★★★</span>
+              <span class="producer-name">O'Callaghan Farm, Cavan</span>
+            </div>
+          </a>
+
+          <a href="/producers" class="product-card">
+            <span class="product-badge"><i data-lucide="wheat"></i> Artisan Baked</span>
+            <img src="{{ url_for('static', filename='wholemeal_bread.png') }}" alt="Wholemeal sourdough">
+            <h3>Martin's Wholemeal Sourdough</h3>
+            <p>Rustic loaves made from organic Irish rye, East Cork &amp; Waterford.</p>
+            <div class="product-meta">
+              <span class="star-rating">★★★★★</span>
+              <span class="producer-name">Martin's Bakery, Cork</span>
+            </div>
+          </a>
+
+          <a href="/producers" class="product-card">
+            <span class="product-badge"><i data-lucide="sprout"></i> Organic</span>
+            <img src="{{ url_for('static', filename='blackberry_honey.png') }}" alt="Blackberry and Heather Honey">
+            <h3>Caheragh Heather &amp; Blackberry Honey</h3>
+            <p>Golden honey from heather and brambles at Caheragh's Organic Farm, Co. Cork.</p>
+            <div class="product-meta">
+              <span class="star-rating">★★★★★</span>
+              <span class="producer-name">Caheragh Farm, Cork</span>
+            </div>
+          </a>
+
+          <a href="/producers" class="product-card">
+            <span class="product-badge"><i data-lucide="droplets"></i> Dairy</span>
+            <img src="{{ url_for('static', filename='eggs.png') }}" alt="Farmhouse Butter">
+            <h3>Connemara Farmhouse Butter</h3>
+            <p>Hand-churned cultured butter from grass-fed cows on the Atlantic coast, Co. Galway.</p>
+            <div class="product-meta">
+              <span class="star-rating">★★★★★</span>
+              <span class="producer-name">Connemara Creamery, Galway</span>
+            </div>
+          </a>
+
+          <a href="/producers" class="product-card">
+            <span class="product-badge"><i data-lucide="beef"></i> Free Range</span>
+            <img src="{{ url_for('static', filename='wholemeal_bread.png') }}" alt="Wicklow Lamb">
+            <h3>Wicklow Mountain Lamb</h3>
+            <p>Tender mountain lamb raised on wild heather and grasses in the Wicklow hills.</p>
+            <div class="product-meta">
+              <span class="star-rating">★★★★★</span>
+              <span class="producer-name">Kavanagh's Farm, Wicklow</span>
+            </div>
+          </a>
+
+          <a href="/producers" class="product-card">
+            <span class="product-badge"><i data-lucide="apple"></i> Seasonal</span>
+            <img src="{{ url_for('static', filename='blackberry_honey.png') }}" alt="Orchard Apples">
+            <h3>Tipperary Heritage Apples</h3>
+            <p>Crisp heritage varieties — Bramley, Cox &amp; Discovery — picked fresh each autumn.</p>
+            <div class="product-meta">
+              <span class="star-rating">★★★★☆</span>
+              <span class="producer-name">Lough Derg Orchard, Tipperary</span>
+            </div>
+          </a>
+
+          <a href="/producers" class="product-card">
+            <span class="product-badge"><i data-lucide="fish"></i> Wild Caught</span>
+            <img src="{{ url_for('static', filename='eggs.png') }}" alt="Atlantic Smoked Salmon">
+            <h3>Donegal Atlantic Smoked Salmon</h3>
+            <p>Wild-caught Atlantic salmon, oak-smoked over 24 hours on the Donegal coast.</p>
+            <div class="product-meta">
+              <span class="star-rating">★★★★★</span>
+              <span class="producer-name">Mulroy Bay Smokehouse, Donegal</span>
+            </div>
+          </a>
+
+          <a href="/producers" class="product-card">
+            <span class="product-badge"><i data-lucide="flower-2"></i> Herbal</span>
+            <img src="{{ url_for('static', filename='blackberry_honey.png') }}" alt="Herb Oils">
+            <h3>Clare Herb &amp; Wildflower Oils</h3>
+            <p>Cold-pressed rapeseed oil infused with fresh-grown herbs from the Burren, Co. Clare.</p>
+            <div class="product-meta">
+              <span class="star-rating">★★★★★</span>
+              <span class="producer-name">Burren Botanicals, Clare</span>
+            </div>
+          </a>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="carousel-dots" id="carousel-dots"></div>
+
+    <script>
+    (function () {
+      const track    = document.getElementById('carousel-track');
+      const dotsWrap = document.getElementById('carousel-dots');
+      const btnPrev  = document.getElementById('carousel-prev');
+      const btnNext  = document.getElementById('carousel-next');
+      const VISIBLE  = 3;       // cards shown at once
+      const INTERVAL = 4500;    // ms between auto-advances
+
+      const cards = track.querySelectorAll('.product-card');
+      const total = cards.length;
+      const steps = total - VISIBLE + 1;  // valid index positions
+      let current = 0;
+      let timer;
+
+      // Build dots
+      for (let i = 0; i < steps; i++) {
+        const dot = document.createElement('button');
+        dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+        dot.addEventListener('click', () => goTo(i));
+        dotsWrap.appendChild(dot);
+      }
+
+      function cardWidth() {
+        return cards[0].getBoundingClientRect().width + 16; // card + gap
+      }
+
+      function goTo(index) {
+        current = Math.max(0, Math.min(index, steps - 1));
+        track.style.transform = `translateX(-${current * cardWidth()}px)`;
+        dotsWrap.querySelectorAll('.carousel-dot').forEach((d, i) =>
+          d.classList.toggle('active', i === current));
+      }
+
+      function next() { goTo(current + 1 < steps ? current + 1 : 0); }
+      function prev() { goTo(current - 1 >= 0 ? current - 1 : steps - 1); }
+
+      function startAuto() { timer = setInterval(next, INTERVAL); }
+      function stopAuto()  { clearInterval(timer); }
+
+      btnNext.addEventListener('click', () => { stopAuto(); next(); startAuto(); });
+      btnPrev.addEventListener('click', () => { stopAuto(); prev(); startAuto(); });
+
+      // Pause on hover
+      track.parentElement.addEventListener('mouseenter', stopAuto);
+      track.parentElement.addEventListener('mouseleave', startAuto);
+
+      // Recalculate on resize
+      window.addEventListener('resize', () => goTo(current));
+
+      startAuto();
+    })();
+    </script>
+
+    <!-- Map -->
+    <div class="map-section">
+      <h3><i data-lucide="map-pin"></i> Local Producers Near You</h3>
+      <iframe allow="geolocation"
+              src="https://api.maptiler.com/maps/streets-v4/?key=8BqITlUwuZGlrDfOT8wd#10.7/51.88983/-8.43203"
+              title="Local producers map"></iframe>
+    </div>
+  </div>
+
+  <!-- Why Irish Grown -->
+  <div class="bevel-box">
+    <h1>Why Irish Grown?</h1>
+    <div class="features-grid">
+      <div class="feature-item">
+        <span class="icon"><i data-lucide="truck"></i></span>
+        <h3>Direct from the Farm</h3>
+        <p>Cut out the middleman. Buy straight from the producer for the freshest produce at fair prices.</p>
+      </div>
+      <div class="feature-item">
+        <span class="icon"><i data-lucide="leaf"></i></span>
+        <h3>Sustainably Sourced</h3>
+        <p>We prioritise producers who farm with care for the land, using organic and low-impact methods.</p>
+      </div>
+      <div class="feature-item">
+        <span class="icon"><i data-lucide="users"></i></span>
+        <h3>Supporting Communities</h3>
+        <p>Every purchase supports a small Irish family farm or artisan producer in your county.</p>
+      </div>
+      <div class="feature-item">
+        <span class="icon"><i data-lucide="map-pin"></i></span>
+        <h3>Hyper-Local</h3>
+        <p>Discover incredible produce made just down the road — fresher, tastier, and lower food miles.</p>
+      </div>
+      <div class="feature-item">
+        <span class="icon"><i data-lucide="award"></i></span>
+        <h3>Quality Guaranteed</h3>
+        <p>All producers are vetted and reviewed by our community to ensure exceptional quality every time.</p>
+      </div>
+      <div class="feature-item">
+        <span class="icon"><i data-lucide="heart"></i></span>
+        <h3>Proudly Irish</h3>
+        <p>From the Wild Atlantic Way to the sunny southeast — celebrating the best of Irish food culture.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Testimonials -->
+  <div class="bevel-box">
+    <h1>What Our Customers Say</h1>
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <p class="quote">"The honey from Caheragh is absolutely incredible — I've never tasted anything like it. Knowing it comes from just 30 miles away makes it even better!"</p>
+        <span class="author">— Siobhán M., Co. Cork</span>
+      </div>
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <p class="quote">"Irish Grown has completely changed how I shop for food. The eggs are so fresh — you can actually taste the difference. Will never go back to supermarket eggs!"</p>
+        <span class="author">— Padraig O'B., Co. Cavan</span>
+      </div>
+      <div class="testimonial-card">
+        <div class="stars">★★★★☆</div>
+        <p class="quote">"Martin's sourdough is honestly the best bread I've ever had. The platform is brilliant for finding hidden gems right in your own county."</p>
+        <span class="author">— Aoife K., Co. Waterford</span>
+      </div>
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <p class="quote">"As a small producer, Irish Grown gave me a platform to reach customers I never could have found on my own. Absolutely brilliant service."</p>
+        <span class="author">— Seamus D., Co. Galway (Producer)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="bevel-box search-section">
+    <h1>Find Your Favourite Produce</h1>
+    <p class="search-subtext">Search from hundreds of fresh Irish products across 26 counties</p>
+    <form autocomplete="off" class="search-form" action="">
+      <span class="search-icon-wrap"><i data-lucide="search"></i></span>
+      <input id="product-search" class="disappearing" type="text" value="Search for a product..." />
+      <button type="submit" class="search-go-btn">Search</button>
+    </form>
+  </div>
+
+{% endblock %}

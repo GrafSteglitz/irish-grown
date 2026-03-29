@@ -1,0 +1,26 @@
+[
+  {
+    "id": 101,
+    "name": "Organic Irish Apples",
+    "category": "Produce",
+    "price": 4.99,
+    "currency": "EUR",
+    "image": "https://via.placeholder.com/150/ff6347/ffffff?text=Apples"
+  },
+  {
+    "id": 102,
+    "name": "Organic Whole Milk",
+    "category": "Dairy",
+    "price": 5.49,
+    "currency": "EUR",
+    "image": "https://via.placeholder.com/150/ffffff/000000?text=Milk"
+  },
+  {
+    "id": 103,
+    "name": "Organic Rolled Oats",
+    "category": "Pantry",
+    "price": 3.25,
+    "currency": "EUR",
+    "image": "https://via.placeholder.com/150/d2b48c/ffffff?text=Oats"
+  }
+]

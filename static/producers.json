@@ -1,0 +1,129 @@
+[
+  {
+    "username": "admin",
+    "business_name": "Admin Producer",
+    "address": "Irish Grown HQ, Dublin",
+    "eircode": "D01 F5P2",
+    "county": "Dublin",
+    "telephone": "+353 1 000 0000",
+    "categories": [
+      "Vegetables & Greens",
+      "Dairy & Eggs",
+      "Baked Goods"
+    ],
+    "description": "Platform administrator account.",
+    "joined": "2026-01-01"
+  },
+  {
+    "username": "gordons_hill",
+    "business_name": "Gordon's Hill Farm",
+    "address": "Gordonstown, Roscommon",
+    "eircode": "F42 XY12",
+    "county": "Roscommon",
+    "telephone": "+353 90 123 4567",
+    "categories": [
+      "Vegetables & Greens",
+      "Meat & Poultry"
+    ],
+    "description": "A family-run farm in the heart of Roscommon, producing organic vegetables and free-range meat for three generations. We believe in farming in harmony with nature.",
+    "joined": "2026-03-10"
+  },
+  {
+    "username": "ocallagh_farm",
+    "business_name": "O'Callaghan Farm",
+    "address": "Ballinagh, Co. Cavan",
+    "eircode": "H12 AB34",
+    "county": "Cavan",
+    "telephone": "+353 49 433 1234",
+    "categories": [
+      "Eggs & Poultry",
+      "Dairy"
+    ],
+    "description": "Nestled in the rolling hills of Cavan, O'Callaghan Farm has produced free-range eggs and farmhouse dairy for over 30 years. Our hens roam freely on lush pasture year-round.",
+    "joined": "2026-01-15"
+  },
+  {
+    "username": "martinbakery",
+    "business_name": "Martin's Organic Bakery",
+    "address": "Midleton, Co. Cork",
+    "eircode": "P25 CD56",
+    "county": "Cork",
+    "telephone": "+353 21 461 7890",
+    "categories": [
+      "Artisan Baked",
+      "Bread & Pastry"
+    ],
+    "description": "Martin's crafts rustic sourdoughs and wholemeal loaves using stone-ground organic Irish rye and wheat. Every loaf is hand-shaped and slow-fermented for 24 hours.",
+    "joined": "2026-02-03"
+  },
+  {
+    "username": "caheragh_farm",
+    "business_name": "Caheragh Organic Farm",
+    "address": "Caheragh, Skibbereen, Co. Cork",
+    "eircode": "P81 EF78",
+    "county": "Cork",
+    "telephone": "+353 28 412 3456",
+    "categories": [
+      "Honey & Preserves",
+      "Organic"
+    ],
+    "description": "Set in the wild beauty of West Cork, Caheragh Organic Farm produces award-winning heather and blackberry honey. Our bees forage across unspoiled meadows and coastal hedgerows.",
+    "joined": "2026-01-28"
+  },
+  {
+    "username": "connemara_creamery",
+    "business_name": "Connemara Creamery",
+    "address": "Clifden, Co. Galway",
+    "eircode": "H71 GH90",
+    "county": "Galway",
+    "telephone": "+353 95 21234",
+    "categories": [
+      "Dairy",
+      "Cheese & Butter"
+    ],
+    "description": "Our Atlantic coast creamery sources milk exclusively from grass-fed cows grazing on the Connemara landscape. We hand-churn butter, age artisan cheeses and make thick farmhouse yogurts.",
+    "joined": "2026-02-20"
+  },
+  {
+    "username": "kavanagh_farm",
+    "business_name": "Kavanagh's Farm",
+    "address": "Tinahely, Co. Wicklow",
+    "eircode": "Y14 IJ12",
+    "county": "Wicklow",
+    "telephone": "+353 402 38765",
+    "categories": [
+      "Meat & Poultry",
+      "Free Range"
+    ],
+    "description": "For four generations, Kavanagh's have raised slow-grown lamb and beef on the bracken slopes of the Wicklow Mountains. All animals are reared outdoors with care and given space to thrive.",
+    "joined": "2026-02-10"
+  },
+  {
+    "username": "mulroy_smokehouse",
+    "business_name": "Mulroy Bay Smokehouse",
+    "address": "Milford, Co. Donegal",
+    "eircode": "F92 KL34",
+    "county": "Donegal",
+    "telephone": "+353 74 915 3456",
+    "categories": [
+      "Fish & Seafood",
+      "Smoked"
+    ],
+    "description": "Perched on the shores of Mulroy Bay, we wild-catch Atlantic salmon and oak-smoke it over 24 hours using traditional methods. From bay to your door in under 48 hours.",
+    "joined": "2026-03-01"
+  },
+  {
+    "username": "burren_botanicals",
+    "business_name": "Burren Botanicals",
+    "address": "Ballyvaughan, Co. Clare",
+    "eircode": "V95 MN56",
+    "county": "Clare",
+    "telephone": "+353 65 707 8901",
+    "categories": [
+      "Herbs & Oils",
+      "Organic"
+    ],
+    "description": "From the limestone pavements of the Burren, we cold-press rapeseed oil and infuse it with freshly-grown herbs. Every bottle captures the unique terroir of this extraordinary landscape.",
+    "joined": "2026-03-05"
+  }
+]

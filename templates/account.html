@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+{% block title %}My Account – Irish Grown{% endblock %}
+
+{% block scripts %}
+<style>
+  .account-page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 16px 60px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .account-page > div { margin-left: 0 !important; margin-right: 0 !important; }
+
+  /* Header */
+  .account-header {
+    background: linear-gradient(135deg, #0a7a38 0%, #14a356 55%, #1bc467 100%);
+    border-radius: 20px;
+    padding: 36px 36px 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .account-header::before {
+    content: '';
+    position: absolute; top: -40%; right: -10%;
+    width: 120%; height: 150%;
+    background: radial-gradient(circle at 80% 20%, rgba(255,255,255,0.07) 0%, transparent 55%);
+    pointer-events: none;
+  }
+  .account-avatar {
+    width: 72px; height: 72px;
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.4);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin: 0;
+  }
+  .account-avatar svg { width: 36px; height: 36px; stroke: white; stroke-width: 1.5; fill: none; }
+  .account-header-info { flex: 1; margin: 0; }
+  .account-header-info h1 { font-size: 1.7rem; margin: 0 0 4px; text-align: left; }
+  .account-header-info p  { margin: 0; color: rgba(255,255,255,0.72); font-size: 0.9rem; }
+  .account-header-badge {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+    margin: 0;
+  }
+
+  /* Cards */
+  .account-card {
+    background: rgba(4, 28, 12, 0.82);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.13);
+    border-radius: 18px;
+    padding: 28px 30px;
+  }
+  .account-card h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.55);
+    margin: 0 0 20px;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .account-card h2 svg { width: 16px; height: 16px; stroke: #1bc467; stroke-width: 2; fill: none; }
+
+  /* Profile grid */
+  .profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin: 0;
+  }
+  .profile-field { margin: 0; }
+  .profile-field label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 5px;
+  }
+  .profile-field span {
+    font-size: 0.97rem;
+    color: rgba(255,255,255,0.9);
+    display: block;
+  }
+
+  /* Stats row */
+  .account-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 0;
+  }
+  .stat-tile {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+    margin: 0;
+  }
+  .stat-tile svg { width: 22px; height: 22px; stroke: #1bc467; stroke-width: 1.8; fill: none; margin-bottom: 8px; }
+  .stat-tile .stat-num { font-size: 1.6rem; font-weight: 800; color: white; display: block; }
+  .stat-tile .stat-label { font-size: 0.78rem; color: rgba(255,255,255,0.45); }
+
+  /* Orders table */
+  .orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+  .orders-table th {
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    padding: 0 12px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .orders-table td {
+    padding: 14px 12px;
+    color: rgba(255,255,255,0.85);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .orders-table tr:last-child td { border-bottom: none; }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    margin: 0;
+  }
+  .empty-state svg { width: 48px; height: 48px; stroke: rgba(255,255,255,0.2); stroke-width: 1.2; fill: none; margin-bottom: 16px; }
+  .empty-state h3 { font-size: 1.1rem; margin: 0 0 8px; color: rgba(255,255,255,0.6); }
+  .empty-state p  { font-size: 0.88rem; color: rgba(255,255,255,0.35); margin: 0 0 24px; }
+  .btn-shop {
+    display: inline-block;
+    background: linear-gradient(135deg, #14a356 0%, #1bc467 100%);
+    color: white; text-decoration: none;
+    font-weight: 700; font-size: 0.9rem;
+    padding: 11px 24px; border-radius: 10px;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn-shop:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(20,163,86,0.4); }
+
+  .loading-placeholder { text-align:center; padding:60px 20px; color:rgba(255,255,255,0.35); }
+
+  @media (max-width: 600px) {
+    .account-header { flex-direction: column; text-align: center; padding: 28px 24px; }
+    .account-header-info h1 { text-align: center; }
+    .account-header-badge { align-self: center; }
+    .profile-grid { grid-template-columns: 1fr; }
+    .account-stats { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block body_content %}
+<div class="account-page" id="account-page">
+  <div class="loading-placeholder">Loading account…</div>
+</div>
+
+<script>
+function _escHtml(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function loadAccount() {
+  const page = document.getElementById('account-page');
+  try {
+    const res  = await fetch('/api/account/me');
+    const data = await res.json();
+    if (!res.ok) { window.location.href = '/login'; return; }
+
+    const c      = data;
+    const orders = c.orders || [];
+    const name   = c.name || c.username || 'My Account';
+
+    let ordersHtml;
+    if (orders.length) {
+      const rows = orders.map(o => `
+        <tr>
+          <td>#${_escHtml(o.id || '—')}</td>
+          <td>${_escHtml(o.date || '—')}</td>
+          <td>${(o.items || []).length}</td>
+          <td>€${_escHtml(o.total || '0.00')}</td>
+          <td>${_escHtml(o.status || 'Processing')}</td>
+        </tr>`).join('');
+      ordersHtml = `
+        <table class="orders-table">
+          <thead><tr>
+            <th>Order</th><th>Date</th><th>Items</th><th>Total</th><th>Status</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    } else {
+      ordersHtml = `
+        <div class="empty-state">
+          <i data-lucide="shopping-cart"></i>
+          <h3>No orders yet</h3>
+          <p>When you place an order it will appear here so you can track it.</p>
+          <a href="/" class="btn-shop">Browse products</a>
+        </div>`;
+    }
+
+    page.innerHTML = `
+      <!-- Header -->
+      <div class="account-header">
+        <div class="account-avatar"><i data-lucide="user"></i></div>
+        <div class="account-header-info">
+          <h1>${_escHtml(name)}</h1>
+          <p>Member since ${_escHtml(c.joined || 'N/A')} &nbsp;·&nbsp; @${_escHtml(c.username || '')}</p>
+        </div>
+        <div class="account-header-badge">Customer</div>
+      </div>
+
+      <!-- Stats -->
+      <div class="account-card">
+        <h2><i data-lucide="bar-chart-2"></i> Overview</h2>
+        <div class="account-stats">
+          <div class="stat-tile">
+            <i data-lucide="shopping-bag"></i>
+            <span class="stat-num">${orders.length}</span>
+            <span class="stat-label">Orders placed</span>
+          </div>
+          <div class="stat-tile">
+            <i data-lucide="heart"></i>
+            <span class="stat-num">0</span>
+            <span class="stat-label">Saved items</span>
+          </div>
+          <div class="stat-tile">
+            <i data-lucide="map-pin"></i>
+            <span class="stat-num">${_escHtml(c.county || '—')}</span>
+            <span class="stat-label">Your county</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile info -->
+      <div class="account-card">
+        <h2><i data-lucide="user-circle"></i> Profile information</h2>
+        <div class="profile-grid">
+          <div class="profile-field"><label>Full name</label><span>${_escHtml(c.name || '—')}</span></div>
+          <div class="profile-field"><label>Username</label><span>@${_escHtml(c.username || '—')}</span></div>
+          <div class="profile-field"><label>Email address</label><span>${_escHtml(c.email || '—')}</span></div>
+          <div class="profile-field"><label>Member since</label><span>${_escHtml(c.joined || '—')}</span></div>
+        </div>
+      </div>
+
+      <!-- Order history -->
+      <div class="account-card">
+        <h2><i data-lucide="package"></i> Order history</h2>
+        ${ordersHtml}
+      </div>`;
+
+    lucide.createIcons();
+  } catch (err) {
+    page.innerHTML = '<div class="loading-placeholder">Failed to load account.</div>';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadAccount);
+</script>
+{% endblock %}

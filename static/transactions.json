@@ -1,0 +1,23 @@
+[
+  {
+    "id": "TXN-8842",
+    "date": "2024-03-10",
+    "type": "Sale",
+    "amount": "+€15.50",
+    "status": "Completed"
+  },
+  {
+    "id": "TXN-8841",
+    "date": "2024-03-09",
+    "type": "Sale",
+    "amount": "+€8.50",
+    "status": "Completed"
+  },
+  {
+    "id": "TXN-8839",
+    "date": "2024-03-01",
+    "type": "Payout",
+    "amount": "-€150.00",
+    "status": "Processed"
+  }
+]

@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+{% block title %}Explore Producers – Irish Grown{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<style>
+  .producers-page { max-width: 1100px; margin: 0 auto; padding: 32px 16px 60px; }
+  .producers-page > * { margin-left: 0 !important; margin-right: 0 !important; }
+
+  .producers-hero {
+    background: linear-gradient(135deg, #0a7a38 0%, #14a356 55%, #1bc467 100%);
+    border-radius: 20px; padding: 44px 40px; text-align: center;
+    position: relative; overflow: hidden; margin-bottom: 28px;
+  }
+  .producers-hero::before {
+    content:''; position:absolute; top:-40%; left:-20%;
+    width:160%; height:160%;
+    background:radial-gradient(circle at 60% 40%, rgba(255,255,255,0.07) 0%, transparent 55%);
+    pointer-events:none;
+  }
+  .producers-hero h1 { font-size:2.2rem; margin:0 0 8px; }
+  .producers-hero p  { font-size:1rem; color:rgba(255,255,255,0.8); margin:0; }
+
+  .filter-bar {
+    background:rgba(4,28,12,0.82); backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,0.12); border-radius:16px;
+    padding:20px 24px; display:flex; gap:16px; align-items:flex-end;
+    flex-wrap:wrap; margin-bottom:24px;
+  }
+  .filter-bar > * { margin:0 !important; }
+  .filter-group { display:flex; flex-direction:column; gap:6px; }
+  .filter-group label { font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:rgba(255,255,255,0.45); }
+  .filter-input, .filter-select {
+    padding:9px 14px; background:rgba(255,255,255,0.07);
+    border:1.5px solid rgba(255,255,255,0.14); border-radius:10px;
+    color:white; font-family:inherit; font-size:0.9rem; min-width:160px;
+  }
+  .filter-input::placeholder { color:rgba(255,255,255,0.28); }
+  .filter-input:focus, .filter-select:focus { outline:none; border-color:#1bc467; }
+  .filter-select option { background:#041c0a; color:white; }
+  .filter-clear {
+    padding:9px 18px; background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.15); border-radius:10px;
+    color:rgba(255,255,255,0.6); font-family:inherit; font-size:0.88rem;
+    cursor:pointer; transition:background 0.15s,color 0.15s; align-self:flex-end;
+  }
+  .filter-clear:hover { background:rgba(255,255,255,0.14); color:white; }
+
+  .category-chips { display:flex; gap:8px; flex-wrap:wrap; margin:0 0 20px; }
+  .cat-chip {
+    padding:5px 14px; background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.16); border-radius:20px;
+    font-size:0.8rem; color:rgba(255,255,255,0.65); cursor:pointer;
+    transition:background 0.15s,color 0.15s,border-color 0.15s;
+  }
+  .cat-chip.active { background:#1bc467; border-color:#1bc467; color:#020f05; font-weight:700; }
+  .cat-chip:hover:not(.active) { background:rgba(255,255,255,0.14); color:white; }
+
+  .results-bar { display:flex; justify-content:space-between; align-items:center; margin:0 0 16px; font-size:0.88rem; color:rgba(255,255,255,0.5); }
+  #results-count { font-weight:600; color:white; }
+
+  .producers-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:20px; }
+
+  .producer-card {
+    background:rgba(4,28,12,0.82); backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,0.12); border-radius:18px;
+    overflow:hidden; transition:transform 0.2s,box-shadow 0.2s,border-color 0.2s;
+    display:flex; flex-direction:column; text-decoration:none; color:inherit;
+  }
+  .producer-card:hover { transform:translateY(-4px); box-shadow:0 16px 40px rgba(0,0,0,0.35); border-color:rgba(27,196,103,0.35); color:inherit; }
+  .producer-card-banner {
+    height:90px;
+    background:linear-gradient(135deg,#0a7a38 0%,#14a356 55%,#1bc467 100%);
+    position:relative; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .producer-card-banner svg { width:40px; height:40px; stroke:rgba(255,255,255,0.35); fill:none; stroke-width:1.2; }
+  .producer-card-county {
+    position:absolute; top:10px; right:12px;
+    background:rgba(0,0,0,0.3); border-radius:12px; padding:3px 10px;
+    font-size:0.72rem; font-weight:700; color:rgba(255,255,255,0.85); letter-spacing:0.5px;
+  }
+  .producer-card-body { padding:18px 20px 16px; flex:1; display:flex; flex-direction:column; gap:8px; }
+  .producer-card-body > * { margin:0 !important; }
+  .producer-card-name { font-size:1.1rem; font-weight:800; color:white; }
+  .producer-card-desc { font-size:0.84rem; color:rgba(255,255,255,0.55); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; line-height:1.5; }
+  .producer-card-cats { display:flex; gap:6px; flex-wrap:wrap; }
+  .producer-card-cat { font-size:0.72rem; background:rgba(27,196,103,0.15); border:1px solid rgba(27,196,103,0.3); border-radius:10px; padding:2px 9px; color:#4cd98a; font-weight:600; }
+  .producer-card-footer { display:flex; align-items:center; justify-content:space-between; padding:12px 20px; border-top:1px solid rgba(255,255,255,0.07); flex-shrink:0; }
+  .producer-card-footer > * { margin:0 !important; }
+  .producer-joined { font-size:0.75rem; color:rgba(255,255,255,0.35); }
+  .producer-visit-btn { font-size:0.82rem; font-weight:700; color:#4cd98a; display:flex; align-items:center; gap:5px; }
+  .producer-visit-btn svg { width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2.5; }
+  .no-results { grid-column:1/-1; text-align:center; padding:60px 20px; color:rgba(255,255,255,0.35); display:none; }
+  .no-results svg { width:48px; height:48px; stroke:rgba(255,255,255,0.15); fill:none; stroke-width:1.2; margin-bottom:16px; }
+  .no-results h3 { font-size:1.1rem; margin:0 0 8px; color:rgba(255,255,255,0.5); }
+  .no-results p { margin:0; font-size:0.88rem; }
+  .loading-placeholder { grid-column:1/-1; text-align:center; padding:60px 20px; color:rgba(255,255,255,0.35); }
+
+  @media (max-width:600px) {
+    .producers-hero { padding:28px 20px; }
+    .producers-hero h1 { font-size:1.6rem; }
+    .filter-bar { flex-direction:column; align-items:stretch; }
+    .filter-input,.filter-select { min-width:0; width:100%; box-sizing:border-box; }
+  }
+</style>
+<script>
+let _allCards = [];
+let _activeCat = null;
+
+function _escHtml(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function _renderProducerCard(p) {
+  const cats    = (p.categories || []).join(', ');
+  const joined  = (p.joined || '').slice(0, 4) || 'N/A';
+  const a       = document.createElement('a');
+  a.href        = `/producers/${_escHtml(p.username)}`;
+  a.className   = 'producer-card';
+  a.dataset.name   = p.business_name || '';
+  a.dataset.county = p.county || '';
+  a.dataset.cats   = cats;
+  a.dataset.desc   = p.description || '';
+  a.innerHTML = `
+    <div class="producer-card-banner">
+      <i data-lucide="sprout"></i>
+      <span class="producer-card-county">${_escHtml(p.county)}</span>
+    </div>
+    <div class="producer-card-body">
+      <div class="producer-card-name">${_escHtml(p.business_name)}</div>
+      <div class="producer-card-desc">${_escHtml(p.description)}</div>
+      <div class="producer-card-cats">${(p.categories || []).map(c => `<span class="producer-card-cat">${_escHtml(c)}</span>`).join('')}</div>
+    </div>
+    <div class="producer-card-footer">
+      <span class="producer-joined">Member since ${_escHtml(joined)}</span>
+      <span class="producer-visit-btn">Visit <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+    </div>`;
+  return a;
+}
+
+function filter() {
+  const q      = document.getElementById('f-search').value.toLowerCase().trim();
+  const county = document.getElementById('f-county').value;
+  let shown = 0;
+  _allCards.forEach(card => {
+    const name = card.dataset.name.toLowerCase();
+    const co   = card.dataset.county;
+    const cats = card.dataset.cats.toLowerCase();
+    const desc = card.dataset.desc.toLowerCase();
+    const ok   = (!q || name.includes(q) || desc.includes(q))
+              && (!county || co === county)
+              && (!_activeCat || cats.includes(_activeCat.toLowerCase()));
+    card.style.display = ok ? '' : 'none';
+    if (ok) shown++;
+  });
+  document.getElementById('results-count').textContent = shown;
+  const noRes = document.getElementById('no-results');
+  if (noRes) noRes.style.display = shown === 0 ? 'block' : 'none';
+}
+
+async function loadProducers() {
+  const grid = document.getElementById('producers-grid');
+  try {
+    const res  = await fetch('/api/producers');
+    const data = await res.json();
+
+    // Populate county dropdown
+    const countyEl = document.getElementById('f-county');
+    const counties = [...new Set((data.producers || []).map(p => p.county).filter(Boolean))].sort();
+    counties.forEach(co => {
+      const opt = document.createElement('option');
+      opt.value = co; opt.textContent = co;
+      countyEl.appendChild(opt);
+    });
+
+    // Populate category chips
+    const allCats = [...new Set((data.producers || []).flatMap(p => p.categories || []))].sort();
+    const chipsEl = document.getElementById('cat-chips');
+    if (allCats.length) {
+      allCats.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'cat-chip';
+        btn.dataset.cat = cat;
+        btn.textContent = cat;
+        btn.addEventListener('click', () => {
+          if (_activeCat === cat) {
+            _activeCat = null; btn.classList.remove('active');
+          } else {
+            document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+            _activeCat = cat; btn.classList.add('active');
+          }
+          filter();
+        });
+        chipsEl.appendChild(btn);
+      });
+      chipsEl.style.display = 'flex';
+    }
+
+    // Render cards
+    grid.innerHTML = '';
+    (data.producers || []).forEach(p => grid.appendChild(_renderProducerCard(p)));
+    const noRes = document.createElement('div');
+    noRes.id = 'no-results';
+    noRes.className = 'no-results';
+    noRes.innerHTML = `<i data-lucide="search-x"></i><h3>No producers found</h3><p>Try adjusting your search or filters</p>`;
+    grid.appendChild(noRes);
+
+    _allCards = Array.from(grid.querySelectorAll('.producer-card[data-name]'));
+    lucide.createIcons();
+    document.getElementById('results-count').textContent = _allCards.length;
+    filter();
+  } catch (err) {
+    grid.innerHTML = '<div class="loading-placeholder">Failed to load producers.</div>';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadProducers();
+  document.getElementById('f-search').addEventListener('input', filter);
+  document.getElementById('f-county').addEventListener('change', filter);
+  document.getElementById('f-clear').addEventListener('click', () => {
+    document.getElementById('f-search').value = '';
+    document.getElementById('f-county').value = '';
+    _activeCat = null;
+    document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+    filter();
+  });
+});
+</script>
+{% endblock %}
+
+{% block body_content %}
+<div class="producers-page">
+  <div class="producers-hero">
+    <h1>Explore Irish Producers</h1>
+    <p>Discover farms and artisan producers from every corner of Ireland</p>
+  </div>
+
+  <div class="filter-bar">
+    <div class="filter-group" style="flex:1;min-width:160px">
+      <label>Search</label>
+      <input id="f-search" class="filter-input" type="text" placeholder="Search by name or description…" />
+    </div>
+    <div class="filter-group">
+      <label>County</label>
+      <select id="f-county" class="filter-select">
+        <option value="">All counties</option>
+      </select>
+    </div>
+    <button id="f-clear" class="filter-clear">Clear</button>
+  </div>
+
+  <div id="cat-chips" class="category-chips" style="display:none"></div>
+
+  <div class="results-bar">
+    <span><span id="results-count">…</span> producers listed</span>
+  </div>
+
+  <div id="producers-grid" class="producers-grid">
+    <div class="loading-placeholder">Loading producers…</div>
+  </div>
+</div>
+{% endblock %}

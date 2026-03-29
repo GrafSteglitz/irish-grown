@@ -1,0 +1,1065 @@
+{% extends "base.html" %}
+{% block title %}
+Irish Grown – Producer Portal
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='search.css') }}">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  /* ── Tabs ──────────────────────────────────────────────────── */
+  .tab-nav {
+    border-bottom: 1px solid rgba(255,255,255,0.2) !important;
+    display: flex !important;
+    gap: 8px !important;
+    padding-bottom: 12px !important;
+    flex-wrap: wrap;
+  }
+  .tab-button {
+    padding: 9px 22px !important;
+    background: rgba(255,255,255,0.1) !important;
+    border: 1px solid rgba(255,255,255,0.22) !important;
+    border-radius: 20px !important;
+    color: white !important;
+    font-family: inherit !important;
+    font-size: 0.9rem !important;
+    cursor: pointer !important;
+    transition: background 0.2s, transform 0.15s !important;
+    position: static !important;
+    top: auto !important;
+    margin-right: 0 !important;
+  }
+  .tab-button:hover:not(.active) {
+    background: rgba(255,255,255,0.18) !important;
+    transform: translateY(-2px);
+  }
+  .tab-button.active {
+    background: white !important;
+    color: #0a7a38 !important;
+    font-weight: bold !important;
+    border-color: white !important;
+  }
+  .tab-content-area {
+    border: none !important;
+    padding: 20px 0 0 !important;
+    background: transparent !important;
+  }
+  .tab-content {
+    display: none !important;
+    background: transparent !important;
+    border: none !important;
+    color: white !important;
+    padding: 0 !important;
+  }
+  .tab-content.active { display: block !important; }
+
+  /* ── Tables ────────────────────────────────────────────────── */
+  .dashboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    color: white !important;
+    background: transparent !important;
+  }
+  .dashboard-table th {
+    background: rgba(255,255,255,0.13) !important;
+    color: rgba(255,255,255,0.8) !important;
+    border: 1px solid rgba(255,255,255,0.15) !important;
+    padding: 11px 14px !important;
+    font-size: 0.78rem !important;
+    letter-spacing: 0.8px !important;
+    text-transform: uppercase !important;
+    font-weight: 700 !important;
+  }
+  .dashboard-table td {
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    padding: 12px 14px !important;
+    color: white !important;
+    vertical-align: middle !important;
+  }
+  .dashboard-table tbody tr:hover { background: rgba(255,255,255,0.06) !important; }
+
+  /* ── Refresh buttons ───────────────────────────────────────── */
+  .refresh-btn {
+    background: rgba(255,255,255,0.1) !important;
+    border: 1px solid rgba(255,255,255,0.22) !important;
+    border-radius: 10px !important;
+    color: white !important;
+    padding: 9px 18px !important;
+    font-family: inherit !important;
+    font-size: 0.88rem !important;
+    cursor: pointer !important;
+    transition: background 0.2s, transform 0.15s !important;
+    margin: 0 8px 16px 0 !important;
+  }
+  .refresh-btn:hover {
+    background: rgba(255,255,255,0.2) !important;
+    transform: translateY(-1px) !important;
+  }
+
+  /* ── Stock input ───────────────────────────────────────────── */
+  .stock-input {
+    width: 68px;
+    padding: 6px 8px;
+    background: rgba(255,255,255,0.1);
+    border: 1.5px solid rgba(255,255,255,0.25);
+    border-radius: 7px;
+    color: white;
+    font-family: inherit;
+    font-size: 0.9rem;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  .stock-input:focus {
+    outline: none;
+    border-color: #1bc467;
+    background: rgba(255,255,255,0.15);
+  }
+
+  /* ── Product thumb ─────────────────────────────────────────── */
+  .product-thumb {
+    width: 52px !important;
+    height: 52px !important;
+    object-fit: cover !important;
+    border-radius: 8px !important;
+    border: 2px solid rgba(255,255,255,0.2) !important;
+  }
+
+  /* ── Status badges ─────────────────────────────────────────── */
+  .status-badge {
+    padding: 3px 11px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: inline-block;
+    letter-spacing: 0.3px;
+  }
+  .status-pending   { background: rgba(255,193,7,0.2);  border: 1px solid rgba(255,193,7,0.45);  color: #ffd740; }
+  .status-completed { background: rgba(76,175,80,0.2);  border: 1px solid rgba(76,175,80,0.45);  color: #80e27e; }
+  .status-cancelled { background: rgba(244,67,54,0.2);  border: 1px solid rgba(244,67,54,0.45);  color: #ff8a80; }
+  .status-default   { background: rgba(255,255,255,0.1);border: 1px solid rgba(255,255,255,0.25);color: rgba(255,255,255,0.8); }
+
+  /* ── Stock indicator ───────────────────────────────────────── */
+  .stock-indicator {
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .stock-ok     { color: #80e27e; }
+  .stock-low    { color: #ffd740; }
+  .stock-empty  { color: #ff8a80; }
+
+  /* ── Stats bar ─────────────────────────────────────────────── */
+  .dash-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    padding: 20px !important;
+  }
+  .dash-stat-card {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 16px;
+    padding: 20px 16px;
+    text-align: center;
+    transition: transform 0.2s;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .dash-stat-card:hover { transform: translateY(-3px); }
+  .dash-stat-icon   { display: flex; justify-content: center; margin-bottom: 10px; }
+  .dash-stat-icon svg { width: 28px; height: 28px; stroke: rgba(255,255,255,0.85); stroke-width: 1.5; fill: none; }
+  .dash-stat-number { font-size: 1.8rem; font-weight: 800; display: block; line-height: 1; }
+  .dash-stat-label  { font-size: 0.75rem; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 4px; display: block; }
+
+  /* ── Lucide icon sizing ─────────────────────────────────────── */
+  .action-btn svg   { width: 15px; height: 15px; stroke: currentColor; stroke-width: 2; fill: none; flex-shrink: 0; }
+  .tab-button svg   { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fill: none; vertical-align: middle; margin-right: 2px; }
+  .refresh-btn svg  { width: 13px; height: 13px; stroke: currentColor; stroke-width: 2; fill: none; vertical-align: middle; margin-right: 4px; }
+  .modal-header svg { width: 20px; height: 20px; stroke: white; stroke-width: 2; fill: none; vertical-align: middle; margin-right: 6px; }
+  .dash-welcome-left h1 svg { width: 28px; height: 28px; stroke: white; stroke-width: 1.5; fill: none; vertical-align: middle; margin-right: 8px; }
+
+  /* ── Quick actions ─────────────────────────────────────────── */
+  .quick-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .action-btn {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.22);
+    border-radius: 12px;
+    color: white;
+    padding: 11px 20px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+  }
+  .action-btn:hover {
+    transform: translateY(-2px);
+    background: rgba(255,255,255,0.18);
+  }
+  .action-btn.green {
+    background: linear-gradient(135deg, #14a356, #1bc467);
+    border-color: transparent;
+    font-weight: bold;
+  }
+  .action-btn.green:hover { filter: brightness(1.08); }
+
+  /* ── Welcome header ────────────────────────────────────────── */
+  .dash-welcome {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .dash-welcome-left h1  { text-align: left; margin: 0 0 4px; }
+  .dash-welcome-left p   { opacity: 0.8; margin: 0; font-size: 0.95rem; }
+  .dash-clock {
+    text-align: right;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 14px;
+    padding: 12px 20px;
+    margin: 0;
+    min-width: 140px;
+  }
+  #clock      { font-size: 1.6rem; font-weight: 800; display: block; line-height: 1; }
+  #clock-date { font-size: 0.72rem; opacity: 0.7; margin-top: 4px; display: block; }
+
+  /* ── Section headings inside tabs ──────────────────────────── */
+  .tab-section-title { margin: 0 0 4px; }
+  .tab-section-sub   { opacity: 0.75; margin: 0 0 16px; font-size: 0.88rem; }
+
+  /* ── Modal – dark glassmorphism ────────────────────────────── */
+  .modal-content {
+    background: rgba(5, 38, 14, 0.96) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255,255,255,0.18) !important;
+    border-radius: 20px !important;
+    color: white !important;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.55) !important;
+    margin: 8% auto !important;
+    width: 460px !important;
+    max-width: 90vw !important;
+  }
+  .modal-header { border-bottom: 1px solid rgba(255,255,255,0.14) !important; }
+  .modal-header h2 { color: white !important; margin: 0; }
+  .close-modal { color: rgba(255,255,255,0.45) !important; transition: color 0.15s; }
+  .close-modal:hover { color: white !important; }
+  .form-group { margin-bottom: 16px !important; margin-left: 0; margin-right: 0; }
+  .form-group label {
+    color: rgba(255,255,255,0.7) !important;
+    font-size: 0.78rem !important;
+    letter-spacing: 0.8px !important;
+    text-transform: uppercase !important;
+    margin-bottom: 7px !important;
+  }
+  .form-group input,
+  .form-group textarea {
+    background: rgba(255,255,255,0.08) !important;
+    border: 1.5px solid rgba(255,255,255,0.2) !important;
+    border-radius: 9px !important;
+    color: white !important;
+    padding: 11px 13px !important;
+    font-family: inherit !important;
+    font-size: 0.95rem !important;
+    transition: border-color 0.2s, background 0.2s !important;
+  }
+  .form-group input:focus,
+  .form-group textarea:focus {
+    outline: none !important;
+    border-color: #1bc467 !important;
+    background: rgba(255,255,255,0.12) !important;
+  }
+  .form-group input[type="file"] { cursor: pointer !important; }
+  .submit-btn {
+    background: linear-gradient(135deg, #14a356, #1bc467) !important;
+    border-radius: 10px !important;
+    padding: 13px !important;
+    font-size: 1rem !important;
+    font-family: inherit !important;
+    font-weight: bold !important;
+    letter-spacing: 0.3px !important;
+    transition: filter 0.15s !important;
+  }
+  .submit-btn:hover { filter: brightness(1.08) !important; }
+
+  /* ── Search section ────────────────────────────────────────── */
+  .search-section { text-align: center; }
+  .search-section h2 { margin-bottom: 6px; }
+  .search-subtext { opacity: 0.8; font-style: italic; font-size: 0.95rem; margin: 0 0 24px; }
+
+  .search-form {
+    display: flex;
+    align-items: center;
+    max-width: 600px;
+    margin: 0 auto;
+    background: rgba(255,255,255,0.12);
+    border: 2px solid rgba(255,255,255,0.28);
+    border-radius: 50px;
+    padding: 6px 6px 6px 20px;
+    gap: 8px;
+    position: relative;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  }
+  .search-form:focus-within {
+    border-color: rgba(255,255,255,0.65);
+    background: rgba(255,255,255,0.17);
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.07);
+  }
+  .search-icon-wrap {
+    display: flex;
+    align-items: center;
+    opacity: 0.55;
+    flex-shrink: 0;
+  }
+  .search-icon-wrap svg { width: 18px; height: 18px; stroke: white; stroke-width: 2; fill: none; }
+  #product-search {
+    flex: 1 !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    color: white !important;
+    font-size: 1rem !important;
+    font-family: inherit !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 10px 0 !important;
+    text-align: left !important;
+    outline: none !important;
+    min-width: 0 !important;
+  }
+  .search-go-btn {
+    background: white;
+    color: #0a7a38;
+    border: none;
+    border-radius: 40px;
+    padding: 10px 26px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.15s, box-shadow 0.15s;
+    white-space: nowrap;
+  }
+  .search-go-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+  }
+
+  /* ── Settings checkboxes ────────────────────────────────────── */
+  .settings-check {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 9px; padding: 10px 14px;
+    cursor: pointer; font-size: 0.88rem;
+    transition: background 0.15s, border-color 0.15s;
+    margin: 0;
+  }
+  .settings-check:hover { background: rgba(255,255,255,0.09); }
+  .settings-check input[type="checkbox"] { accent-color: #1bc467; width: 16px; height: 16px; flex-shrink: 0; cursor: pointer; }
+  /* Location card */
+  .location-card {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px; padding: 10px 14px;
+    font-size: 0.85rem; margin: 0;
+  }
+  .location-card-info { flex: 1; }
+  .location-card-name { font-weight: 600; }
+  .location-card-sub  { font-size: 0.75rem; opacity: 0.55; margin-top: 2px; }
+  /* Leaflet dark tweaks inside dashboard */
+  #settings-map .leaflet-container { background: #0d2010; }
+  .settings-leaflet-popup .leaflet-popup-content-wrapper { background: #0a2e16; color: white; border: 1px solid rgba(255,255,255,0.2); }
+
+  @media (max-width: 768px) {
+    .dash-stats   { grid-template-columns: 1fr 1fr; }
+    .dash-welcome { flex-direction: column; }
+    .dash-welcome-left h1 { text-align: center; }
+    .dash-clock   { width: 100%; text-align: center; min-width: unset; }
+  }
+</style>
+<script type="module">
+  import { initProducerDashboard } from "{{url_for('static',filename='producer_dashboard.js')}}";
+  import { initSearch } from "{{url_for('static',filename='search.js')}}";
+  window.addEventListener("load", () => {
+    const productsUrl     = "{{ url_for('static', filename='products.json') }}";
+    const ordersUrl       = "{{ url_for('static', filename='orders.json') }}";
+    const transactionsUrl = "{{ url_for('static', filename='transactions.json') }}";
+    const username        = "{{ session.username }}";
+    initProducerDashboard(productsUrl, ordersUrl, transactionsUrl, username);
+    initSearch('product-search', 'search-results');
+
+    // Quick-action buttons navigate to the matching tab
+    document.querySelectorAll('.action-btn[data-tab]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelector(`.tab-button[data-tab="${btn.dataset.tab}"]`)?.click();
+        document.querySelector('.tab-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+    // Live clock
+    function updateClock() {
+      const now = new Date();
+      const t = document.getElementById('clock');
+      const d = document.getElementById('clock-date');
+      if (t) t.textContent = now.toLocaleTimeString('en-IE', { hour: '2-digit', minute: '2-digit' });
+      if (d) d.textContent = now.toLocaleDateString('en-IE', { weekday: 'long', day: 'numeric', month: 'long' });
+    }
+    updateClock();
+    setInterval(updateClock, 30000);
+
+    lucide.createIcons();
+
+    // ── Discounts tab ───────────────────────────────────────────────
+    async function loadCoupons() {
+      const tbody = document.querySelector('#coupon-table tbody');
+      const table = document.getElementById('coupon-table');
+      const empty = document.getElementById('coupons-empty');
+      if (!tbody) return;
+      try {
+        const res  = await fetch('/api/coupons');
+        const data = await res.json();
+        const coupons = data.coupons || [];
+        if (coupons.length === 0) {
+          table.style.display = 'none';
+          empty.style.display = 'block';
+          return;
+        }
+        empty.style.display = 'none';
+        table.style.display = '';
+        tbody.innerHTML = coupons.map(c => {
+          const active = c.active !== false;
+          const statusHtml = active
+            ? '<span class="status-badge status-completed">Active</span>'
+            : '<span class="status-badge status-cancelled">Inactive</span>';
+          const amountStr = c.type === 'percent' ? c.amount + '%' : '€' + parseFloat(c.amount).toFixed(2);
+          const minStr    = c.min_order ? '€' + parseFloat(c.min_order).toFixed(2) : '—';
+          const maxStr    = c.max_uses  ? `${c.uses || 0} / ${c.max_uses}` : (c.uses || 0) + ' / ∞';
+          const expStr    = c.expiry    ? c.expiry : '—';
+          return `<tr>
+            <td><strong style="letter-spacing:0.5px;">${_escHtml(c.code)}</strong></td>
+            <td>${c.type === 'percent' ? 'Percentage' : 'Fixed €'}</td>
+            <td>${amountStr}</td>
+            <td>${minStr}</td>
+            <td>${maxStr}</td>
+            <td>${expStr}</td>
+            <td>${statusHtml}</td>
+            <td>
+              <button class="refresh-btn" style="margin:0;padding:6px 12px;font-size:0.78rem;border-radius:8px;"
+                      onclick="deleteCoupon('${_escHtml(c.code)}')">
+                <i data-lucide="trash-2"></i> Delete
+              </button>
+            </td>
+          </tr>`;
+        }).join('');
+        lucide.createIcons();
+      } catch (err) {
+        console.error('loadCoupons:', err);
+      }
+    }
+
+    function _escHtml(s) {
+      return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    window.deleteCoupon = async function(code) {
+      if (!confirm(`Delete coupon "${code}"?`)) return;
+      const res  = await fetch('/api/coupons/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.content ?? '' },
+        body: JSON.stringify({ code })
+      });
+      const data = await res.json();
+      if (data.status === 'success') loadCoupons();
+      else alert(data.message || 'Could not delete coupon.');
+    };
+
+    document.getElementById('coupon-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msgEl  = document.getElementById('coupon-form-msg');
+      const code   = document.getElementById('coup-code').value.trim().toUpperCase();
+      const type   = document.getElementById('coup-type').value;
+      const amount = parseFloat(document.getElementById('coup-amount').value);
+      const min    = parseFloat(document.getElementById('coup-min').value) || 0;
+      const maxU   = document.getElementById('coup-max-uses').value ? parseInt(document.getElementById('coup-max-uses').value) : null;
+      const expiry = document.getElementById('coup-expiry').value || null;
+
+      if (!code || !amount) { msgEl.textContent = 'Code and amount are required.'; msgEl.style.color = '#ff8080'; return; }
+      if (type === 'percent' && (amount <= 0 || amount > 100)) { msgEl.textContent = 'Percentage must be 1–100.'; msgEl.style.color = '#ff8080'; return; }
+
+      try {
+        const csrf = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+        const res  = await fetch('/api/coupons/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
+          body: JSON.stringify({ code, type, amount, min_order: min, max_uses: maxU, expiry })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          msgEl.textContent = '✓ Coupon created!';
+          msgEl.style.color = '#4cd98a';
+          document.getElementById('coupon-form').reset();
+          loadCoupons();
+        } else {
+          msgEl.textContent = data.message || 'Failed to create coupon.';
+          msgEl.style.color = '#ff8080';
+        }
+      } catch {
+        msgEl.textContent = 'Network error.';
+        msgEl.style.color = '#ff8080';
+      }
+    });
+
+    document.getElementById('refresh-coupons')?.addEventListener('click', loadCoupons);
+
+    // Load coupons when discounts tab becomes active
+    document.querySelector('.tab-button[data-tab="#discounts"]')?.addEventListener('click', loadCoupons);
+
+    // ── Settings tab ────────────────────────────────────────────────
+    let _settingsMap      = null;
+    let _settingsMarker   = null;
+    let _pendingLocations = [];   // in-memory list before saving
+    let _marketsLoaded    = false;
+
+    async function loadSettings() {
+      try {
+        const res  = await fetch('/api/producer/settings');
+        const data = await res.json();
+        const s    = data.settings || {};
+
+        // Payment methods
+        const pm = s.payment_methods || [];
+        document.getElementById('pay-card')?.setAttribute('checked', pm.includes('card') ? 'checked' : '');
+        if (document.getElementById('pay-card'))           document.getElementById('pay-card').checked           = pm.includes('card');
+        if (document.getElementById('pay-cash-collection')) document.getElementById('pay-cash-collection').checked = pm.includes('cash_collection');
+        if (document.getElementById('pay-cash-delivery'))   document.getElementById('pay-cash-delivery').checked   = pm.includes('cash_delivery');
+
+        // Delivery methods
+        const dm = s.delivery_methods || [];
+        if (document.getElementById('del-collect'))  document.getElementById('del-collect').checked  = dm.includes('collect_in_person');
+        if (document.getElementById('del-market'))   document.getElementById('del-market').checked   = dm.includes('market_pickup');
+        if (document.getElementById('del-dropoff'))  document.getElementById('del-dropoff').checked  = dm.includes('dropoff_box');
+        if (document.getElementById('del-delivery')) document.getElementById('del-delivery').checked = dm.includes('producer_delivery');
+
+        // Pickup locations
+        _pendingLocations = s.pickup_locations ? JSON.parse(JSON.stringify(s.pickup_locations)) : [];
+        _renderLocationsList();
+        if (_settingsMap && _pendingLocations.length) _syncMapMarkers();
+
+        // Markets — load checklist once, then apply saved selection
+        const myMarketIds = s.market_ids || [];
+        if (!_marketsLoaded) {
+          await _loadMarketsChecklist(myMarketIds);
+        } else {
+          document.querySelectorAll('.market-check').forEach(cb => {
+            cb.checked = myMarketIds.includes(cb.value);
+          });
+        }
+      } catch(e) { console.error('loadSettings:', e); }
+    }
+
+    async function _loadMarketsChecklist(selectedIds) {
+      const loadingEl   = document.getElementById('markets-loading');
+      const checklistEl = document.getElementById('markets-checklist');
+      if (!checklistEl) return;
+      try {
+        const res  = await fetch('/api/markets');
+        const data = await res.json();
+        const markets = data.markets || [];
+
+        // Group by county for display
+        const byCounty = {};
+        markets.forEach(m => {
+          byCounty[m.county] = byCounty[m.county] || [];
+          byCounty[m.county].push(m);
+        });
+
+        checklistEl.innerHTML = Object.entries(byCounty)
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([county, ms]) => ms.map(m => `
+            <label class="settings-check">
+              <input type="checkbox" class="market-check" value="${_escD(m.id)}"
+                ${selectedIds.includes(m.id) ? 'checked' : ''}>
+              <span>
+                <strong style="display:block;font-size:0.88rem;">${_escD(m.name)}</strong>
+                <em style="font-size:0.75rem;opacity:0.55;">${_escD(m.county)} · ${(m.days||[]).join(', ')}</em>
+              </span>
+            </label>`).join('')
+          ).join('');
+
+        if (loadingEl) loadingEl.style.display = 'none';
+        _marketsLoaded = true;
+      } catch(e) {
+        if (loadingEl) loadingEl.textContent = 'Could not load markets.';
+      }
+    }
+
+    function _renderLocationsList() {
+      const el = document.getElementById('locations-list');
+      if (!el) return;
+      if (_pendingLocations.length === 0) {
+        el.innerHTML = '<p style="opacity:0.45;font-size:0.82rem;margin:0;">No locations added yet.</p>';
+        return;
+      }
+      el.innerHTML = _pendingLocations.map((loc, i) => `
+        <div class="location-card">
+          <div class="location-card-info">
+            <div class="location-card-name">${_escD(loc.name)}</div>
+            <div class="location-card-sub">
+              ${loc.address ? _escD(loc.address) + ' · ' : ''}
+              ${loc.lat != null ? loc.lat.toFixed(4) + ', ' + loc.lng.toFixed(4) : ''}
+              ${loc.w3w ? ' · ///' + _escD(loc.w3w.replace(/^\/\/\//, '')) : ''}
+            </div>
+          </div>
+          <button class="refresh-btn" style="margin:0;padding:6px 12px;font-size:0.78rem;border-radius:8px;"
+                  onclick="removeLocation(${i})">
+            <i data-lucide="trash-2"></i>
+          </button>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function _syncMapMarkers() {
+      if (!_settingsMap) return;
+      _settingsMap.eachLayer(l => { if (l instanceof L.Marker) _settingsMap.removeLayer(l); });
+      _pendingLocations.forEach(loc => {
+        if (loc.lat != null && loc.lng != null) {
+          L.marker([loc.lat, loc.lng]).addTo(_settingsMap)
+           .bindPopup(`<strong>${_escD(loc.name)}</strong>`);
+        }
+      });
+    }
+
+    function _escD(s) {
+      return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    window.removeLocation = function(i) {
+      _pendingLocations.splice(i, 1);
+      _renderLocationsList();
+      _syncMapMarkers();
+    };
+
+    function _initSettingsMap() {
+      if (_settingsMap) return;
+      const el = document.getElementById('settings-map');
+      if (!el || typeof L === 'undefined') return;
+      _settingsMap = L.map('settings-map').setView([53.4, -8.0], 7);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap', maxZoom: 18,
+      }).addTo(_settingsMap);
+
+      // Click to set lat/lng fields
+      _settingsMap.on('click', (e) => {
+        const lat = e.latlng.lat.toFixed(5);
+        const lng = e.latlng.lng.toFixed(5);
+        const latIn = document.getElementById('loc-lat');
+        const lngIn = document.getElementById('loc-lng');
+        if (latIn) latIn.value = lat;
+        if (lngIn) lngIn.value = lng;
+        if (_settingsMarker) _settingsMap.removeLayer(_settingsMarker);
+        _settingsMarker = L.marker([lat, lng]).addTo(_settingsMap)
+          .bindPopup('New location pin').openPopup();
+      });
+
+      _syncMapMarkers();
+    }
+
+    document.getElementById('add-location-btn')?.addEventListener('click', () => {
+      const name    = document.getElementById('loc-name')?.value.trim();
+      const address = document.getElementById('loc-address')?.value.trim();
+      const lat     = parseFloat(document.getElementById('loc-lat')?.value);
+      const lng     = parseFloat(document.getElementById('loc-lng')?.value);
+      const w3w     = document.getElementById('loc-w3w')?.value.trim();
+
+      if (!name) { alert('Please enter a location name.'); return; }
+
+      _pendingLocations.push({
+        id:      Date.now().toString(),
+        name,
+        address: address || '',
+        lat:     isNaN(lat) ? null : lat,
+        lng:     isNaN(lng) ? null : lng,
+        w3w:     w3w || '',
+      });
+      _renderLocationsList();
+      _syncMapMarkers();
+
+      // Clear form
+      ['loc-name','loc-address','loc-lat','loc-lng','loc-w3w'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      if (_settingsMarker) { _settingsMap?.removeLayer(_settingsMarker); _settingsMarker = null; }
+    });
+
+    document.getElementById('save-settings-btn')?.addEventListener('click', async () => {
+      const msgEl = document.getElementById('settings-msg');
+      const payment_methods  = ['pay-card','pay-cash-collection','pay-cash-delivery']
+        .filter(id => document.getElementById(id)?.checked)
+        .map(id => document.getElementById(id).value);
+      const delivery_methods = ['del-collect','del-market','del-dropoff','del-delivery']
+        .filter(id => document.getElementById(id)?.checked)
+        .map(id => document.getElementById(id).value);
+
+      try {
+        const csrf = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+        const res  = await fetch('/api/producer/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
+          body: JSON.stringify({
+            payment_methods,
+            delivery_methods,
+            pickup_locations: _pendingLocations,
+            market_ids: Array.from(document.querySelectorAll('.market-check:checked')).map(cb => cb.value),
+          }),
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          msgEl.textContent = '✓ Settings saved!';
+          msgEl.style.color = '#4cd98a';
+        } else {
+          msgEl.textContent = data.message || 'Failed to save.';
+          msgEl.style.color = '#ff8080';
+        }
+      } catch {
+        msgEl.textContent = 'Network error.';
+        msgEl.style.color = '#ff8080';
+      }
+      setTimeout(() => { if (msgEl) msgEl.textContent = ''; }, 4000);
+    });
+
+    document.querySelector('.tab-button[data-tab="#settings"]')?.addEventListener('click', () => {
+      loadSettings();
+      setTimeout(_initSettingsMap, 100);
+    });
+  });
+</script>
+{% endblock %}
+
+{% block body_content %}
+
+<!-- Welcome header -->
+<div class="bevel-box">
+  <div class="dash-welcome">
+    <div class="dash-welcome-left">
+      <h1><i data-lucide="sprout"></i> Producer Portal</h1>
+      <p>Welcome back, <strong>{{ session.username or 'Producer' }}</strong>! Manage your listings, track orders, and grow your business.</p>
+    </div>
+    <div class="dash-clock">
+      <span id="clock"></span>
+      <span id="clock-date"></span>
+    </div>
+  </div>
+</div>
+
+<!-- Stats bar -->
+<div class="bevel-box dash-stats">
+  <div class="dash-stat-card">
+    <span class="dash-stat-icon"><i data-lucide="package"></i></span>
+    <span class="dash-stat-number" id="stat-products">—</span>
+    <span class="dash-stat-label">My Products</span>
+  </div>
+  <div class="dash-stat-card">
+    <span class="dash-stat-icon"><i data-lucide="shopping-cart"></i></span>
+    <span class="dash-stat-number" id="stat-orders">—</span>
+    <span class="dash-stat-label">Total Orders</span>
+  </div>
+  <div class="dash-stat-card">
+    <span class="dash-stat-icon"><i data-lucide="credit-card"></i></span>
+    <span class="dash-stat-number" id="stat-transactions">—</span>
+    <span class="dash-stat-label">Transactions</span>
+  </div>
+  <div class="dash-stat-card">
+    <span class="dash-stat-icon"><i data-lucide="banknote"></i></span>
+    <span class="dash-stat-number" id="stat-revenue">—</span>
+    <span class="dash-stat-label">Total Revenue</span>
+  </div>
+</div>
+
+<!-- Quick actions -->
+<div class="bevel-box">
+  <h2 style="margin: 0 0 14px; text-align: left;">Quick Actions</h2>
+  <div class="quick-actions">
+    <button id="open-add-product" class="action-btn green"><i data-lucide="plus-circle"></i> Add New Product</button>
+    <button class="action-btn" data-tab="#orders"><i data-lucide="shopping-cart"></i> View Orders</button>
+    <button class="action-btn" data-tab="#transactions"><i data-lucide="credit-card"></i> Transactions</button>
+    <button class="action-btn" data-tab="#products"><i data-lucide="layers"></i> Manage Stock</button>
+    <button class="action-btn" data-tab="#discounts"><i data-lucide="tag"></i> Coupons</button>
+    <button class="action-btn" data-tab="#settings"><i data-lucide="settings"></i> Settings</button>
+  </div>
+</div>
+
+<!-- Main tab panel -->
+<div class="bevel-box">
+  <div class="tab-container">
+    <div class="tab-nav">
+      <button class="tab-button" data-tab="#orders"><i data-lucide="shopping-cart"></i> Orders</button>
+      <button class="tab-button" data-tab="#transactions"><i data-lucide="credit-card"></i> Transactions</button>
+      <button class="tab-button" data-tab="#products"><i data-lucide="package"></i> Products &amp; Stock</button>
+      <button class="tab-button" data-tab="#discounts"><i data-lucide="tag"></i> Discounts</button>
+      <button class="tab-button" data-tab="#settings"><i data-lucide="settings"></i> Settings</button>
+    </div>
+    <div class="tab-content-area">
+
+      <!-- Orders tab -->
+      <div id="orders" class="tab-content">
+        <h3 class="tab-section-title">Your Orders</h3>
+        <p class="tab-section-sub">View and manage incoming orders from customers.</p>
+        <button id="refresh-orders" class="refresh-btn"><i data-lucide="refresh-cw"></i> Refresh Orders</button>
+        <table id="order-table" class="dashboard-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Date</th>
+              <th>Total</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <!-- Transactions tab -->
+      <div id="transactions" class="tab-content">
+        <h3 class="tab-section-title">Your Transactions</h3>
+        <p class="tab-section-sub">A full history of your sales and payouts.</p>
+        <button id="refresh-transactions" class="refresh-btn"><i data-lucide="refresh-cw"></i> Refresh Transactions</button>
+        <table id="transaction-table" class="dashboard-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <!-- Products tab -->
+      <div id="products" class="tab-content">
+        <h3 class="tab-section-title">Your Products</h3>
+        <p class="tab-section-sub">Update stock levels inline — changes are saved automatically on blur.</p>
+        <button id="refresh-products" class="refresh-btn"><i data-lucide="refresh-cw"></i> Refresh Stock</button>
+        <table id="product-table" class="dashboard-table">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Product Name</th>
+              <th>Stock Level</th>
+              <th>Delivery Methods</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <!-- Discounts tab -->
+      <div id="discounts" class="tab-content">
+        <h3 class="tab-section-title">Discount Codes</h3>
+        <p class="tab-section-sub">Create coupon codes to share with your customers. Codes are applied at checkout.</p>
+
+        <!-- Create coupon form -->
+        <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:20px 22px;margin-bottom:24px;margin-left:0;margin-right:0;">
+          <h4 style="margin:0 0 16px;font-size:1rem;opacity:0.9;">New Coupon Code</h4>
+          <form id="coupon-form" autocomplete="off">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:0 0 12px;">
+              <div class="form-group" style="margin:0!important;">
+                <label>Code</label>
+                <input type="text" id="coup-code" placeholder="e.g. SUMMER20" maxlength="24" style="text-transform:uppercase;" required>
+              </div>
+              <div class="form-group" style="margin:0!important;">
+                <label>Type</label>
+                <select id="coup-type" style="background:rgba(255,255,255,0.08)!important;border:1.5px solid rgba(255,255,255,0.2)!important;border-radius:9px!important;color:white!important;padding:11px 13px!important;font-family:inherit!important;font-size:0.95rem!important;width:100%!important;cursor:pointer;">
+                  <option value="percent" style="background:#0a2e16;">Percentage off</option>
+                  <option value="fixed"   style="background:#0a2e16;">Fixed € off</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin:0!important;">
+                <label>Amount</label>
+                <input type="number" id="coup-amount" placeholder="e.g. 10" min="0.01" step="0.01" required>
+              </div>
+              <div class="form-group" style="margin:0!important;">
+                <label>Min. Order (€)</label>
+                <input type="number" id="coup-min" placeholder="0.00" min="0" step="0.01" value="0">
+              </div>
+              <div class="form-group" style="margin:0!important;">
+                <label>Max Uses</label>
+                <input type="number" id="coup-max-uses" placeholder="Unlimited" min="1" step="1">
+              </div>
+              <div class="form-group" style="margin:0!important;">
+                <label>Expiry Date</label>
+                <input type="date" id="coup-expiry">
+              </div>
+            </div>
+            <div id="coupon-form-msg" style="font-size:0.82rem;margin:0 0 10px;min-height:18px;"></div>
+            <button type="submit" class="action-btn green" style="margin:0;">
+              <i data-lucide="plus-circle"></i> Create Coupon
+            </button>
+          </form>
+        </div>
+
+        <!-- Existing coupons -->
+        <button id="refresh-coupons" class="refresh-btn"><i data-lucide="refresh-cw"></i> Refresh</button>
+        <div id="coupons-empty" style="display:none;opacity:0.6;font-size:0.9rem;padding:12px 0;">No coupon codes yet.</div>
+        <table id="coupon-table" class="dashboard-table" style="display:none;">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Min Order</th>
+              <th>Uses</th>
+              <th>Expiry</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <!-- Settings tab -->
+      <div id="settings" class="tab-content">
+        <h3 class="tab-section-title">Producer Settings</h3>
+        <p class="tab-section-sub">Configure payment methods, accepted delivery options, and your pickup/collection locations.</p>
+
+        <!-- Payment methods -->
+        <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:20px 22px;margin-bottom:20px;margin-left:0;margin-right:0;">
+          <h4 style="margin:0 0 14px;font-size:1rem;opacity:0.9;"><i data-lucide="credit-card" style="vertical-align:middle;margin-right:6px;width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"></i>Payment Methods</h4>
+          <p style="font-size:0.82rem;opacity:0.6;margin:0 0 14px;">Select the payment methods you will accept from customers.</p>
+          <div style="display:flex;flex-direction:column;gap:10px;margin:0;">
+            <label class="settings-check"><input type="checkbox" id="pay-card" value="card"> <span>Card Payment (Stripe) <em style="opacity:0.5;font-size:0.78rem;">— link your Stripe account in a future step</em></span></label>
+            <label class="settings-check"><input type="checkbox" id="pay-cash-collection" value="cash_collection"> <span>Cash on Collection</span></label>
+            <label class="settings-check"><input type="checkbox" id="pay-cash-delivery" value="cash_delivery"> <span>Cash on Delivery</span></label>
+          </div>
+        </div>
+
+        <!-- Default delivery methods -->
+        <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:20px 22px;margin-bottom:20px;margin-left:0;margin-right:0;">
+          <h4 style="margin:0 0 14px;font-size:1rem;opacity:0.9;"><i data-lucide="truck" style="vertical-align:middle;margin-right:6px;width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"></i>Default Delivery Methods</h4>
+          <p style="font-size:0.82rem;opacity:0.6;margin:0 0 14px;">These apply to all your products unless overridden per-product.</p>
+          <div style="display:flex;flex-direction:column;gap:10px;margin:0;">
+            <label class="settings-check"><input type="checkbox" id="del-collect" value="collect_in_person"> <span>Collect in Person</span></label>
+            <label class="settings-check"><input type="checkbox" id="del-market" value="market_pickup"> <span>Market Pick-up</span></label>
+            <label class="settings-check"><input type="checkbox" id="del-dropoff" value="dropoff_box"> <span>Locked Drop-Off Box</span></label>
+            <label class="settings-check"><input type="checkbox" id="del-delivery" value="producer_delivery"> <span>Producer to Customer Delivery</span></label>
+          </div>
+        </div>
+
+        <!-- Pickup / collection locations -->
+        <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:20px 22px;margin-bottom:20px;margin-left:0;margin-right:0;">
+          <h4 style="margin:0 0 6px;font-size:1rem;opacity:0.9;"><i data-lucide="map-pin" style="vertical-align:middle;margin-right:6px;width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"></i>Pickup / Collection Locations</h4>
+          <p style="font-size:0.82rem;opacity:0.6;margin:0 0 14px;">Add locations where customers can collect their orders. Use the map to find coordinates.</p>
+
+          <!-- Map for picking location -->
+          <div id="settings-map" style="height:220px;border-radius:10px;overflow:hidden;margin:0 0 14px;border:1px solid rgba(255,255,255,0.15);"></div>
+          <p style="font-size:0.76rem;opacity:0.5;margin:0 0 14px;">Click the map to set coordinates for a new location.</p>
+
+          <!-- Add location form -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:0 0 12px;">
+            <div class="form-group" style="margin:0!important;">
+              <label>Location Name</label>
+              <input type="text" id="loc-name" placeholder="e.g. Farm Gate">
+            </div>
+            <div class="form-group" style="margin:0!important;">
+              <label>Address</label>
+              <input type="text" id="loc-address" placeholder="e.g. Main St, Roscommon">
+            </div>
+            <div class="form-group" style="margin:0!important;">
+              <label>Latitude</label>
+              <input type="number" id="loc-lat" placeholder="53.4239" step="0.0001">
+            </div>
+            <div class="form-group" style="margin:0!important;">
+              <label>Longitude</label>
+              <input type="number" id="loc-lng" placeholder="-7.9407" step="0.0001">
+            </div>
+            <div class="form-group" style="margin:0!important;">
+              <label>what3words</label>
+              <input type="text" id="loc-w3w" placeholder="///word.word.word">
+            </div>
+          </div>
+          <button class="action-btn" id="add-location-btn" style="margin:0 0 16px;"><i data-lucide="plus-circle"></i> Add Location</button>
+
+          <!-- Locations list -->
+          <div id="locations-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
+
+        <!-- Farmer's market attendance -->
+        <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:20px 22px;margin-bottom:20px;margin-left:0;margin-right:0;">
+          <h4 style="margin:0 0 6px;font-size:1rem;opacity:0.9;"><i data-lucide="store" style="vertical-align:middle;margin-right:6px;width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"></i>Farmer's Markets I Attend</h4>
+          <p style="font-size:0.82rem;opacity:0.6;margin:0 0 14px;">Select the markets where you sell. Customers can browse and mix products from producers who share a common market.</p>
+          <div id="markets-loading" style="opacity:0.45;font-size:0.82rem;margin:0;">Loading markets…</div>
+          <div id="markets-checklist" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin:0;"></div>
+        </div>
+
+        <div id="settings-msg" style="font-size:0.85rem;min-height:20px;margin:0 0 10px;"></div>
+        <button class="action-btn green" id="save-settings-btn" style="margin:0;"><i data-lucide="save"></i> Save Settings</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Add Product Modal -->
+<div id="addProductModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2><i data-lucide="plus-circle"></i> Add New Product</h2>
+      <span class="close-modal">&times;</span>
+    </div>
+    <form id="add-product-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group">
+        <label for="product-name">Product Name</label>
+        <input type="text" id="product-name" name="name" placeholder="e.g. Free-range Eggs" required>
+      </div>
+      <div class="form-group">
+        <label for="product-image">Product Image</label>
+        <input type="file" id="product-image" name="image" accept="image/*">
+      </div>
+      <div class="form-group">
+        <label for="product-description">Description</label>
+        <textarea id="product-description" name="description" rows="3" placeholder="Describe your product..."></textarea>
+      </div>
+      <div class="form-group">
+        <label for="product-stock">Initial Stock Level</label>
+        <input type="number" id="product-stock" name="stock" value="0" min="0">
+      </div>
+      <button type="submit" class="submit-btn">Create Product</button>
+    </form>
+  </div>
+</div>
+
+<!-- Product search -->
+<div class="bevel-box search-section">
+  <h2 style="margin-bottom: 6px;">Search Products</h2>
+  <p class="search-subtext">Find any product in the catalogue</p>
+  <form autocomplete="off" class="search-form" action="">
+    <span class="search-icon-wrap"><i data-lucide="search"></i></span>
+    <input id="product-search" class="disappearing" type="text" value="Search for a product..." />
+    <button type="submit" class="search-go-btn">Search</button>
+  </form>
+</div>
+
+{% endblock %}
