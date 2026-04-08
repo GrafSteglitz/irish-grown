@@ -1,0 +1,566 @@
+/*
+ * mobile.css — Irish Grown responsive overrides
+ *
+ * Breakpoints used:
+ *   ≤ 900px  tablet landscape / small laptop
+ *   ≤ 700px  tablet portrait / large phone  (nav hamburger already activates here)
+ *   ≤ 600px  standard phone
+ *   ≤ 400px  small phone (SE, older Android)
+ *
+ * Loaded after all other stylesheets so specificity wins cleanly.
+ */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   1. GLOBAL — body, typography, div margin bleed, touch targets
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Make background cover rather than tile on small screens */
+body {
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+/* Prevent any element from causing horizontal page overflow */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* Stop the global div margin rule in styles.css from bleeding into
+   layout containers that have their own responsive padding. */
+@media (max-width: 700px) {
+  .flex-container,
+  .flex-container > *,
+  .bevel-box,
+  .site-nav,
+  .site-nav div,
+  .site-footer,
+  .site-footer div {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  /* Ensure top-level flex container fills the screen edge-to-edge
+     but keeps comfortable inner padding on each child section */
+  .flex-container {
+    padding: 0 12px;
+    gap: 16px;
+  }
+}
+
+/* Inputs: keep font ≥ 16px to prevent iOS auto-zoom on focus */
+@media (max-width: 700px) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
+
+/* Minimum tap-target height for all interactive elements */
+@media (max-width: 700px) {
+  button, a.nav-btn-primary, a.nav-btn-ghost, a.nav-btn-outline,
+  .tab-button, .action-btn {
+    min-height: 44px;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   2. NAV — tighten inner padding at narrow widths
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 700px) {
+  .nav-inner {
+    padding: 0 14px;
+    height: 56px;
+  }
+  .nav-logo {
+    font-size: 1rem;
+    margin-right: 0;
+  }
+  /* Slightly larger cart icon touch area */
+  .nav-cart-btn {
+    padding: 8px 10px;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   3. CART / CHECKOUT — bottom sheet on mobile
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  /* Slide up from bottom rather than scale from centre */
+  .cart-drawer {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 92dvh;      /* dvh respects mobile browser chrome */
+    border-radius: 22px 22px 0 0;
+    transform: translateY(8%) scale(1);
+    opacity: 0;
+    /* override the default centre-modal transform */
+    transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.28s;
+  }
+  .cart-drawer.open {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+
+  /* Drag handle visual cue */
+  .cart-drawer-header::before {
+    content: '';
+    display: block;
+    width: 38px; height: 4px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 2px;
+    position: absolute;
+    top: 8px; left: 50%;
+    transform: translateX(-50%);
+  }
+  .cart-drawer-header {
+    position: relative;
+    padding-top: 26px;
+  }
+
+  /* Cart view: remove the max-width centering constraint */
+  #cart-view {
+    max-width: 100%;
+  }
+
+  /* Checkout columns already stack at 620px — add extra breathing room */
+  .checkout-body {
+    padding: 16px 16px 24px;
+  }
+  .co-columns {
+    gap: 18px;
+  }
+
+  /* Coupon row: stack on very narrow */
+  .co-coupon-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .co-coupon-row button {
+    width: 100%;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   4. TEST-MODE BANNER — tighten padding on small screens
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  #test-banner-backdrop > div {
+    padding: 28px 20px 22px !important;
+    border-radius: 16px !important;
+  }
+  #test-banner-backdrop h2 {
+    font-size: 1.15rem !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   5. INDEX PAGE — hero, stats, nav cards, features, testimonials
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .hero {
+    padding: 36px 20px 32px;
+    border-radius: 16px;
+  }
+  .hero h1 {
+    font-size: 2rem;
+    letter-spacing: 0;
+  }
+  .hero .tagline {
+    font-size: 1rem;
+    margin-bottom: 24px;
+  }
+  .cta-buttons {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .cta-buttons a {
+    width: 100%;
+    max-width: 300px;
+    text-align: center;
+    padding: 13px 20px;
+  }
+}
+
+@media (max-width: 400px) {
+  .hero h1 { font-size: 1.7rem; }
+  .hero .tagline { font-size: 0.92rem; }
+}
+
+/* Stats bar: stack into 2-column grid on mobile */
+@media (max-width: 600px) {
+  .stats-bar {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+  .stat-divider { display: none !important; }
+  .stat-item {
+    padding: 14px 10px !important;
+    text-align: center;
+  }
+}
+
+/* Nav cards: 1 column on small phones */
+@media (max-width: 440px) {
+  .nav-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Featured products: single column */
+@media (max-width: 600px) {
+  .product-container,
+  .featured-grid {
+    flex-direction: column !important;
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Search bar on index */
+@media (max-width: 600px) {
+  .search-form {
+    width: 100% !important;
+  }
+  .search-section {
+    padding: 0 0 8px !important;
+  }
+}
+
+/* Map section iframe */
+@media (max-width: 600px) {
+  .map-section iframe {
+    height: 240px !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   6. PRODUCTS PAGE — filter bar, product grid, card actions
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  /* product grid is auto-fill minmax(220px,1fr): already 1-col below ~240px,
+     but force it earlier for breathing room */
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
+    gap: 14px !important;
+  }
+  .product-card-name { font-size: 0.88rem !important; }
+}
+
+@media (max-width: 380px) {
+  .products-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   7. PRODUCERS PAGE — producer cards
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 400px) {
+  .producers-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   8. MARKETS PAGE — detail panel, product mini-cards
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .markets-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+  .market-detail-panel {
+    padding: 18px 14px 22px !important;
+    border-radius: 14px !important;
+  }
+  .panel-products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+    gap: 8px !important;
+  }
+  /* Map inside panel: shorter on mobile */
+  #market-detail-map { height: 160px !important; }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   9. LOGIN & REGISTER PAGES
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  /* Login */
+  .login-wrapper, .reg-wrapper {
+    flex-direction: column !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    min-height: unset !important;
+    border-radius: 18px !important;
+  }
+  .login-brand-panel, .reg-brand-panel {
+    padding: 28px 22px !important;
+    border-radius: 18px 18px 0 0 !important;
+  }
+  .login-benefits, .reg-benefits { display: none !important; }
+  .login-form-panel, .reg-form-panel {
+    width: 100% !important;
+    padding: 28px 22px !important;
+    border-radius: 0 0 18px 18px !important;
+  }
+  /* Make the outer bevel-box full-bleed */
+  .login-wrapper, .reg-wrapper {
+    margin: 0 !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   10. PRODUCER DASHBOARD — tabs, tables, stats, modals
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Tab nav: horizontal scroll so all tabs remain accessible */
+@media (max-width: 700px) {
+  .tab-nav {
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 8px !important;
+    gap: 6px !important;
+  }
+  .tab-nav::-webkit-scrollbar { display: none; }
+  .tab-button {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    padding: 8px 16px !important;
+    font-size: 0.82rem !important;
+  }
+}
+
+/* Stats: already 2-column at 768px; force 1-column on phones */
+@media (max-width: 480px) {
+  .dash-stats {
+    grid-template-columns: 1fr 1fr !important;
+    padding: 14px !important;
+    gap: 10px !important;
+  }
+  .dash-stat-number { font-size: 1.4rem !important; }
+}
+
+/* Dashboard tables: horizontal scroll, no text wrapping on key columns */
+@media (max-width: 700px) {
+  .dashboard-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+  .dashboard-table td, .dashboard-table th {
+    padding: 10px 10px !important;
+    font-size: 0.8rem !important;
+  }
+  /* Product table thumbnail: smaller on mobile */
+  .product-thumb {
+    width: 36px !important;
+    height: 36px !important;
+  }
+}
+
+/* Action buttons row: wrap on small screens */
+@media (max-width: 600px) {
+  .action-row, .bevel-box > div[style*="display:flex"] {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  .action-btn {
+    font-size: 0.82rem !important;
+    padding: 8px 14px !important;
+  }
+}
+
+/* Add-product modal: full-width on phones */
+@media (max-width: 600px) {
+  .modal-content {
+    width: 92vw !important;
+    margin: 6% auto !important;
+    padding: 20px 18px !important;
+    border-radius: 16px !important;
+  }
+  .modal-header h2 { font-size: 1rem !important; }
+}
+
+/* Location card in settings: stack info + button */
+@media (max-width: 600px) {
+  .location-card {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+}
+
+/* Settings map: shorter on mobile */
+@media (max-width: 600px) {
+  #settings-map { height: 160px !important; }
+}
+
+/* Stock-edit inputs in product table: ensure visible */
+@media (max-width: 700px) {
+  .stock-input {
+    width: 60px !important;
+    min-width: 50px !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   11. ADMIN ANALYTICS DASHBOARD
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .kpi-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+  .kpi-value { font-size: 1.6rem !important; }
+  .charts-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .chart-panel.wide {
+    grid-column: 1 !important;
+  }
+  .chart-canvas-wrap       { height: 200px !important; }
+  .chart-canvas-wrap.tall  { height: 260px !important; }
+  .admin-header h1 { font-size: 1.4rem !important; }
+}
+
+/* Admin tables: horizontal scroll */
+@media (max-width: 700px) {
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .data-table {
+    white-space: nowrap;
+    font-size: 0.78rem !important;
+  }
+  .data-table th, .data-table td {
+    padding: 8px 10px !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   12. FOOTER — already has 680px breakpoint; add phone-specific tightening
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .footer-links {
+    grid-template-columns: 1fr 1fr !important;
+    display: grid !important;
+    gap: 20px 16px !important;
+  }
+  .footer-inner {
+    padding: 0 14px 28px !important;
+  }
+  .footer-bottom {
+    padding: 14px 14px !important;
+    font-size: 0.72rem !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   13. FORM GRID (styles.css legacy .form-grid) — full-width on mobile
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 700px) {
+  .form-grid {
+    width: 100% !important;
+    grid-template-columns: 1fr !important;
+  }
+  .form-grid input[type=text],
+  .form-grid input[type=submit],
+  .form-grid label,
+  .form-grid .form-error {
+    grid-column: 1 !important;
+    width: 100% !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   14. ACCOUNT PAGE — order history, profile cards
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 700px) {
+  /* Any flex rows in account that should stack */
+  .account-grid,
+  .order-history-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .account-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   15. PRODUCER PROFILE / LANDING PAGE
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .profile-header {
+    flex-direction: column !important;
+    text-align: center !important;
+    padding: 22px 16px !important;
+  }
+  .profile-products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   16. GENERIC BEVEL-BOX padding tightening on small screens
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .bevel-box {
+    padding: 14px !important;
+    border-radius: 16px !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   17. CHECKOUT — delivery option descriptions (expandable detail panels)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .co-delivery-option {
+    padding: 10px 12px !important;
+  }
+  .co-delivery-detail {
+    font-size: 0.8rem !important;
+    padding: 8px 10px !important;
+  }
+}
