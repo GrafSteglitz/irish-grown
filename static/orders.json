@@ -38,7 +38,7 @@
         "delivery_methods": [
           "producer_delivery"
         ],
-        "image": "eggs.png",
+        "image": "img/eggs.png",
         "name": "Farm Fresh Eggs",
         "pickup_locations": [],
         "price": 4.5,
@@ -74,7 +74,7 @@
         "delivery_methods": [
           "producer_delivery"
         ],
-        "image": "eggs.png",
+        "image": "img/eggs.png",
         "name": "Farm Fresh Eggs",
         "pickup_locations": [],
         "price": 4.5,
@@ -113,7 +113,7 @@
           "dropoff_box",
           "producer_delivery"
         ],
-        "image": "eggs.png",
+        "image": "img/eggs.png",
         "name": "Farm Fresh Eggs",
         "pickup_locations": [],
         "price": 4.5,

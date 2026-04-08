@@ -3,7 +3,7 @@
     "id": 1,
     "name": "Farm Fresh Eggs",
     "stock": 120,
-    "image": "eggs.png",
+    "image": "img/eggs.png",
     "producer": "ocallagh_farm",
     "price": 4.5
   },
@@ -267,7 +267,7 @@
     "id": 34,
     "name": "Donegal Smoked Salmon (200g)",
     "stock": 30,
-    "image": "eggs.png",
+    "image": "img/eggs.png",
     "producer": "mulroy_smokehouse",
     "price": 11.99,
     "description": "Wild-caught Atlantic salmon, oak-smoked over 24 hours on the Donegal coast."
@@ -276,7 +276,7 @@
     "id": 35,
     "name": "Oak-Smoked Mackerel Fillets",
     "stock": 25,
-    "image": "eggs.png",
+    "image": "img/eggs.png",
     "producer": "mulroy_smokehouse",
     "price": 7.5,
     "description": "Fresh Atlantic mackerel, brined and cold-smoked over oak chips."
@@ -285,7 +285,7 @@
     "id": 36,
     "name": "Connemara Aged Cheddar",
     "stock": 20,
-    "image": "eggs.png",
+    "image": "img/eggs.png",
     "producer": "connemara_creamery",
     "price": 9.99,
     "description": "12-month aged Irish cheddar with a sharp, nutty flavour."
@@ -294,7 +294,7 @@
     "id": 37,
     "name": "Burren Herb Rapeseed Oil (250ml)",
     "stock": 40,
-    "image": "eggs.png",
+    "image": "img/eggs.png",
     "producer": "burren_botanicals",
     "price": 6.99,
     "description": "Cold-pressed rapeseed oil infused with fresh rosemary and thyme from the Burren."
@@ -303,7 +303,7 @@
     "id": 38,
     "name": "Caheragh Blackberry Jam",
     "stock": 35,
-    "image": "blackberry_honey.png",
+    "image": "img/blackberry_honey.png",
     "producer": "caheragh_farm",
     "price": 4.5,
     "description": "Wild blackberry jam made with fruit hand-picked from Caheragh hedgerows."
@@ -312,7 +312,7 @@
     "id": 39,
     "name": "Martin's Spelt Loaf",
     "stock": 18,
-    "image": "wholemeal_bread.png",
+    "image": "img/wholemeal_bread.png",
     "producer": "martinbakery",
     "price": 5.5,
     "description": "Stone-ground spelt sourdough with a crackly crust and open crumb."
