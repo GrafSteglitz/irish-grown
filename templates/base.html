@@ -25,6 +25,80 @@
 </head>
 
 <body>
+
+<!-- ── Test-mode notice (shown once per browser via localStorage) ──────── -->
+<div id="test-banner-backdrop" style="
+  display:none; position:fixed; inset:0; z-index:9999;
+  background:rgba(0,0,0,0.72); backdrop-filter:blur(6px);
+  align-items:center; justify-content:center; padding:20px;">
+  <div style="
+    max-width:480px; width:100%;
+    background:linear-gradient(160deg,#041c0a 0%,#0a3318 100%);
+    border:1px solid rgba(27,196,103,0.35); border-radius:20px;
+    padding:36px 32px 28px; position:relative; box-shadow:0 24px 80px rgba(0,0,0,0.6);">
+
+    <!-- Icon -->
+    <div style="
+      width:52px; height:52px; border-radius:14px; margin:0 auto 18px;
+      background:rgba(27,196,103,0.15); border:1px solid rgba(27,196,103,0.3);
+      display:flex; align-items:center; justify-content:center;">
+      <i data-lucide="flask-conical" style="width:24px;height:24px;stroke:#1bc467;fill:none;stroke-width:2;"></i>
+    </div>
+
+    <!-- Heading -->
+    <h2 style="text-align:center;margin:0 0 6px;font-size:1.35rem;color:white;">
+      You're viewing a test site
+    </h2>
+    <p style="text-align:center;margin:0 0 20px;font-size:0.82rem;
+      color:rgba(255,255,255,0.45);letter-spacing:0.5px;text-transform:uppercase;font-weight:700;">
+      Demo mode · Simulated data
+    </p>
+
+    <!-- Body -->
+    <p style="color:rgba(255,255,255,0.75);font-size:0.92rem;line-height:1.65;margin:0 0 14px;text-align:center;">
+      <strong style="color:white;">Irish Grown</strong> is currently running with simulated producers,
+      products, and orders for demonstration purposes.
+      No real transactions will be processed.
+    </p>
+    <p style="color:rgba(255,255,255,0.5);font-size:0.85rem;line-height:1.6;margin:0 0 26px;text-align:center;">
+      The fully live platform — with real local producers and fresh
+      Irish produce — is coming very soon. 🌱
+    </p>
+
+    <!-- Dismiss button -->
+    <button onclick="dismissTestBanner()" style="
+      display:block; width:100%; padding:13px;
+      background:linear-gradient(135deg,#14a356 0%,#1bc467 100%);
+      border:none; border-radius:12px; color:white;
+      font-family:inherit; font-size:0.95rem; font-weight:700;
+      cursor:pointer; transition:filter 0.15s;"
+      onmouseover="this.style.filter='brightness(1.1)'"
+      onmouseout="this.style.filter=''">
+      Got it — take me to the site
+    </button>
+
+    <!-- Fine print -->
+    <p style="text-align:center;margin:14px 0 0;font-size:0.72rem;color:rgba(255,255,255,0.25);">
+      This message won't appear again on this device.
+    </p>
+  </div>
+</div>
+
+<script>
+  (function () {
+    if (!localStorage.getItem('ig_test_banner_dismissed')) {
+      var el = document.getElementById('test-banner-backdrop');
+      el.style.display = 'flex';
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      else window.addEventListener('load', function(){ lucide.createIcons(); });
+    }
+  })();
+  function dismissTestBanner() {
+    localStorage.setItem('ig_test_banner_dismissed', '1');
+    document.getElementById('test-banner-backdrop').style.display = 'none';
+  }
+</script>
+
 	<nav class="site-nav">
 		<div class="nav-inner">
 			<a class="nav-logo" href="{{ url_for('index') }}">
