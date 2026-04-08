@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # start.sh — Launch Irish Grown with Gunicorn
 # Usage:
-#   ./start.sh              # production-style (4 workers, port 5000)
+#   ./start.sh              # production-style (4 workers, port 8000)
 #   ./start.sh --dev        # single worker with reload for development
 #   PORT=8080 ./start.sh    # custom port
 
@@ -26,7 +26,7 @@ fi
 
 # ── Config ──────────────────────────────────────────────────────────────────
 HOST="${HOST:-0.0.0.0}"
-PORT="${PORT:-5000}"
+PORT="${PORT:-8000}"
 WORKERS="${WORKERS:-4}"
 LOG_LEVEL="${LOG_LEVEL:-info}"
 ACCESS_LOG="${ACCESS_LOG:--}"   # '-' = stdout
