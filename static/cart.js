@@ -157,7 +157,7 @@ function _renderCart(items) {
       <img class="cart-item-img"
            src="${_esc(imgSrc(item))}"
            alt="${_esc(item.name)}"
-           onerror="this.src='/static/eggs.png'">
+           onerror="this.src='/static/img/eggs.png'">
       <div class="cart-item-info">
         <div class="cart-item-name">${_esc(item.name)}</div>
         <div class="cart-item-producer">${_esc(item.producer_name || '')}</div>
